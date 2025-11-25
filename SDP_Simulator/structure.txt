@@ -3,7 +3,7 @@ Let it be known that I hate organizing. Please document any changes/additions to
 
 
 container class (class)                                          << to be passed to functions as a parameter
-    objects (struct)
+    objects (struct)                                             << add camera point and vector
         playerHitbox[vertex index][coordinate index]
         lightSource[coordinate index]
         object (struct)                                          << platforms, end, water
@@ -26,6 +26,11 @@ container class (class)                                          << to be passed
             vertices[vertex index][coordinate index]
         currentPixels (key: screen coordinates, value: color)
         previousPixels (key: screen coordinates, value: color)
+        lines (struct)
+            y
+            x1
+            x2
+            color
 
     states (struct)                                              << runtime gameplay states and general trash bin I guess
         idk hp? # of lives?                                      << maybe split into player and gameplay states

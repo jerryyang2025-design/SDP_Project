@@ -15,7 +15,7 @@ float polygonLightning(struct Object object, int polygon, std::array<float,3> li
         vectorOne[i] = vertices[1][i] - vertices[0][i];
         vectorTwo[i] = vertices[2][i] - vertices[0][i];
         toLightVector[i] = lightSource[i] - center[i];
-        toCameraVector[i] = -center[i]; // assume player and camera are at 0 0 0
+        toCameraVector[i] = -center[i]; // change to camera point
     }
 
     crossProduct(vectorOne,vectorTwo,normalVector);
