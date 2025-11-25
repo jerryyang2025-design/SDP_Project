@@ -1,0 +1,64 @@
+Let it be known that I hate organizing. Please document any changes/additions to the data structure here
+
+
+
+container class (class)                                          << to be passed to functions as a parameter
+    objects (struct)
+        playerHitbox[vertex index][coordinate index]
+        lightSource[coordinate index]
+        object (struct)                                          << platforms, end, water
+            vertices[vertex index][coordinate index]
+            faces[face index][vertex index]
+            faceColors[face index][RGB index]
+            color[RGB index]                                     << fixed object color, default polygon color
+            hitbox[face index][vertex index]
+            center[coordinate index]
+            reflectionValue                                      << set between 0 and 1, 1 being max reflection
+            refractionValue                                      << set between 0 and 1, 1 being max light scattering
+        ...
+    
+    screen (struct)
+        width
+        height
+        polygons (within view) (struct)
+            depth
+            color[RGB index]
+            vertices[vertex index][coordinate index]
+        currentPixels (key: screen coordinates, value: color)
+        previousPixels (key: screen coordinates, value: color)
+
+    states (struct)                                              << runtime gameplay states and general trash bin I guess
+        idk hp? # of lives?                                      << maybe split into player and gameplay states
+        movement speed limit? maybe unnecessary, idk
+        velocity vector
+        points? idk maybe also stage metadata to prevent double points?
+        stage?
+        timer?
+        idk music related thing, figure this out
+        number of frames as long (for the wave animation)
+        paused? in menu?
+        idk what I'm doing
+    
+    rotation
+        previous mouse location
+        current mouse location
+        xz rotation theta
+        yz rotation theta
+        total yz angle to avoid looking beyond -90 and 90 degrees
+    
+    files (struct)
+        player.obj
+        art (struct)
+            menu art idk
+            cutscene1?
+            cutscene2?
+        music (struct)
+            um stuff I guess
+        stage (struct)                                           << stage 1, stage 2, etc
+            1_iceberg1.obj                                       << may need to abbreviate if too long
+            1_iceberg2.obj                                       << 1_ means stage 1
+            1_water.obj
+            1_endflag.obj
+            backgroundColor[RGB index]
+            ...
+        ...

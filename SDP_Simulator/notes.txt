@@ -1,0 +1,7 @@
+high frame rate, low movement steps per frame
+check collisions through clipping to a certain distance
+add music
+add cutscenes at the beginning and menu screen art
+create models
+title idea?
+    - Warning: Warming
