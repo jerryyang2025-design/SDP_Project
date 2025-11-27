@@ -6,13 +6,15 @@ container class (class)                                          << to be passed
     objects (struct)                                             << add camera point and vector
         playerHitbox[vertex index][coordinate index]
         lightSource[coordinate index]
-        object (struct)                                          << platforms, end, water
+        cameraPosition[coordinate index]
+        cameraVector[coordinate index]
+        object (struct)                                          << platforms, moving platforms, end, water
             vertices[vertex index][coordinate index]
             faces[face index][vertex index]
             faceColors[face index][RGB index]
             color[RGB index]                                     << fixed object color, default polygon color
             hitbox[face index][vertex index]
-            center[coordinate index]
+            center[coordinate index]                             << used to filter collision tests
             reflectionValue                                      << set between 0 and 1, 1 being max reflection
             refractionValue                                      << set between 0 and 1, 1 being max light scattering
         ...
@@ -20,27 +22,27 @@ container class (class)                                          << to be passed
     screen (struct)
         width
         height
-        polygons (within view) (struct)
-            depth
-            color[RGB index]
-            vertices[vertex index][coordinate index]
-        currentPixels (key: screen coordinates, value: color)
+        vertices[vertex index][coordinate index]
+        faces[face index][vertex index]
+        faceColors[face index][RGB index]
+        depths (key: screen coordinates, value: depth)
+        currentPixels (key: screen coordinates, value: color)    << maybe change to arrays if performance is noticably slow
         previousPixels (key: screen coordinates, value: color)
-        lines (struct)
+        line (struct)
             y
             x1
             x2
             color
+        ...
 
     states (struct)                                              << runtime gameplay states and general trash bin I guess
-        idk hp? # of lives?                                      << maybe split into player and gameplay states
-        movement speed limit? maybe unnecessary, idk
+        movement speed limit? maybe unnecessary, idk             << maybe split into player and gameplay states
         velocity vector
         points? idk maybe also stage metadata to prevent double points?
         stage?
         timer?
         idk music related thing, figure this out
-        number of frames as long (for the wave animation)
+        number of frames as long (for the wave animation, and maybe platform movement)
         paused? in menu?
         idk what I'm doing
     
@@ -59,11 +61,11 @@ container class (class)                                          << to be passed
             cutscene2?
         music (struct)
             um stuff I guess
-        stage (struct)                                           << stage 1, stage 2, etc
+        stage (struct)
             1_iceberg1.obj                                       << may need to abbreviate if too long
             1_iceberg2.obj                                       << 1_ means stage 1
-            1_water.obj
-            1_endflag.obj
+            1_water.obj                                          << add variables associated with each file to adjust scale and location (scale, center)
+            1_endflag.obj                                        << may also need to specify if the iceberg moves
             backgroundColor[RGB index]
             ...
         ...

@@ -33,14 +33,17 @@ float distance(float x, float y, float z) {
 }
 
 float direction(float a[],float b[]) {
-    float magnitudeOne = pythag(pythag(a[0],a[1]),a[2]);
-    float magnitudeTwo = pythag(pythag(b[0],b[1]),b[2]);
+    float magnitudeOne = distance(a[0],a[1],a[2]);
+    float magnitudeTwo = distance(b[0],b[1],b[2]);
     float dot = dotProduct(a,b);
+    if (fabs(magnitudeOne) < 0.001 || fabs(magnitudeTwo) < 0.001) {
+        return 0;
+    }
     return dot / (magnitudeOne * magnitudeTwo);
 }
 
 float angle(float a[],float b[]) {
-    return acos(direction(a, b));
+    return acos(clamp(direction(a, b),-1,1));
 }
 
 float fieldOfViewBoundX(float z) {

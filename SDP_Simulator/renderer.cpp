@@ -2,20 +2,20 @@
 #include "data.h"
 #include "utils.h"
 
-#define BRIGHTNESS 3000000
+#define BRIGHTNESS 3000000 // may adjust depending on light source distance
 
-float polygonLightning(struct Object object, int polygon, std::array<float,3> lightSource) {
-    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],toLightVector[3],toCameraVector[3],sortaHalfVector[3];
+void polygonLightning(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
+    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],toLightVector[3],toCameraVector[3],halfVector[3];
     std::vector<std::array<float,3>> vertices = {object.vertices[object.faces[polygon][0]],
         object.vertices[object.faces[polygon][1]], 
         object.vertices[object.faces[polygon][2]]};
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) { // maybe precompute and store polygon vectors if noticably slow
         center[i] = (vertices[0][i] + vertices[1][i] + vertices[2][i]) / 3;
         vectorOne[i] = vertices[1][i] - vertices[0][i];
         vectorTwo[i] = vertices[2][i] - vertices[0][i];
         toLightVector[i] = lightSource[i] - center[i];
-        toCameraVector[i] = -center[i]; // change to camera point
+        toCameraVector[i] = cameraPosition[i] -center[i];
     }
 
     crossProduct(vectorOne,vectorTwo,normalVector);
@@ -28,24 +28,33 @@ float polygonLightning(struct Object object, int polygon, std::array<float,3> li
     for (int i = 0; i < 3; i++) {
         toLightVector[i] /= magnitudeOne;
         toCameraVector[i] /= magnitudeTwo;
-        sortaHalfVector[i] = toLightVector[i] + toCameraVector[i];
+        halfVector[i] = toLightVector[i] + toCameraVector[i];
     }
 
-    float theta = angle(sortaHalfVector, normalVector);
+    float theta = angle(halfVector, normalVector);
 
     float shine;
     if (dotProduct(toLightVector,normalVector) > 0) {
-        shine = object.reflectionValue / (theta * theta + 1) + 1; // maybe change the squared part, that's to make sure it goes down quickly
+        shine = object.reflectionValue / (theta * theta + 1) + 1; // maybe adjust the squared part, that's to make sure it goes down quickly
     } else {
         shine = 1;
     }
 
     float lightValueMultiplier = BRIGHTNESS * dir * shine / (dist * dist);
-    return lightValueMultiplier;
+
+    if (lightValueMultiplier >= 1) {
+        for (int i = 0; i < 3; i++) {
+            object.faceColors[polygon][i] = clamp(object.faceColors[polygon][i] * lightValueMultiplier,0,255);
+        }
+    } else {
+        object.faceColors[polygon][0] = clamp(object.faceColors[polygon][0] * lightValueMultiplier,0,255);
+        object.faceColors[polygon][1] = clamp(object.faceColors[polygon][1] * pow(lightValueMultiplier,0.8),0,255);
+        object.faceColors[polygon][2] = clamp(object.faceColors[polygon][2] * pow(lightValueMultiplier,0.5),0,255); // adjust values
+    }
 }
 
-void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource) {
-    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],halfVector[3];
+void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
+    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],toLightVector[3],toCameraVector[3],halfVector[3];
     std::vector<std::array<float,3>> vertices = {object.vertices[object.faces[polygon][0]],
         object.vertices[object.faces[polygon][1]], 
         object.vertices[object.faces[polygon][2]]};
@@ -54,7 +63,16 @@ void polygonRefraction(struct Object& object, int polygon, std::array<float,3> l
         center[i] = (vertices[0][i] + vertices[1][i] + vertices[2][i]) / 3;
         vectorOne[i] = vertices[1][i] - vertices[0][i];
         vectorTwo[i] = vertices[2][i] - vertices[0][i];
-        halfVector[i] = lightSource[i] - 2 * center[i];
+        toLightVector[i] = lightSource[i] - center[i];
+        toCameraVector[i] = cameraPosition[i] -center[i];
+    }
+
+    float magnitudeOne = distance(toLightVector[0],toLightVector[1],toLightVector[2]);
+    float magnitudeTwo = distance(toCameraVector[0],toCameraVector[1],toCameraVector[2]);
+    for (int i = 0; i < 3; i++) {
+        toLightVector[i] /= magnitudeOne;
+        toCameraVector[i] /= magnitudeTwo;
+        halfVector[i] = toLightVector[i] + toCameraVector[i];
     }
 
     crossProduct(vectorOne,vectorTwo,normalVector);
@@ -68,12 +86,31 @@ void polygonRefraction(struct Object& object, int polygon, std::array<float,3> l
         0.5 + 0.5 * sin(shift * 6.2831 + 4.0)};
 
     for (int i = 0; i < 3; i++) {
-        object.faceColors[polygon][i] = clamp(object.faceColors[polygon][i] + colorShift[i] * object.refractionValue,0,255); // maybe change to use default object color, depending on when lighting is called
+        object.faceColors[polygon][i] = clamp(object.faceColors[polygon][i] + colorShift[i] * object.refractionValue,0,255);
     }
 }
 
-double waveMovement(std::array<float,3> vertex, long frames) {
-    return sin(frames * 0.25 + vertex[0] + vertex[2]); // maybe adjust depending on framerate
+void handleLighting(struct Objects& objects) {
+    for (int i = 0; i < objects.platforms.size(); i++) {
+        for (int j = 0; j < objects.platforms[i].faces.size(); j++) {
+            polygonLightning(objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
+            polygonRefraction(objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
+        }
+    }
+    for (int i = 0; i < objects.movingPlatforms.size(); i++) {
+        for (int j = 0; j < objects.movingPlatforms[i].faces.size(); j++) {
+            polygonLightning(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+            polygonRefraction(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+        }
+    }
+    for (int j = 0; j < objects.end.faces.size(); j++) {
+        polygonLightning(objects.end,j,objects.lightSource,objects.cameraPosition);
+        polygonRefraction(objects.end,j,objects.lightSource,objects.cameraPosition);
+    }
+    for (int j = 0; j < objects.water.faces.size(); j++) {
+        polygonLightning(objects.water,j,objects.lightSource,objects.cameraPosition);
+        polygonRefraction(objects.water,j,objects.lightSource,objects.cameraPosition);
+    }
 }
 
 def project(point,scale):
