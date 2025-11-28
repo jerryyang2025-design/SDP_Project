@@ -4,8 +4,8 @@
 #include <array>
 #include <map>
 
-#define SCREEN_X 319
-#define SCREEN_Y 239
+#define SCREEN_X 320
+#define SCREEN_Y 240
 
 struct Object {
     std::vector<std::array<float,3>> vertices;
@@ -17,7 +17,7 @@ struct Object {
 
 struct Objects {
     std::vector<std::array<float,3>> playerHitbox;
-    std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector; // play around with the values
+    std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector, cameraUpVector, cameraRightVector; // play around with the values
     struct Object end, water;
     std::vector<struct Object> platforms, movingPlatforms;
 };
@@ -28,7 +28,6 @@ struct line {
 };
 
 struct Screen {
-    int width = SCREEN_X, height = SCREEN_Y;
     std::vector<std::array<float,4>> vertices; // stored as a float to keep accurate depth value (not z, find projection with cameraVector), and in or out of view
     std::vector<std::array<int,3>> faces, faceColors;
     std::map<std::array<std::array<int,SCREEN_X>,SCREEN_Y>,float> depths; // used for z buffer

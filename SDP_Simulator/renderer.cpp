@@ -5,7 +5,7 @@
 #define BRIGHTNESS 3000000 // may adjust depending on light source distance
 
 void polygonLightning(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
-    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],toLightVector[3],toCameraVector[3],halfVector[3];
+    std::array<float,3> center,vectorOne,vectorTwo,normalVector,toLightVector,toCameraVector,halfVector;
     std::vector<std::array<float,3>> vertices = {object.vertices[object.faces[polygon][0]],
         object.vertices[object.faces[polygon][1]], 
         object.vertices[object.faces[polygon][2]]};
@@ -18,7 +18,7 @@ void polygonLightning(struct Object& object, int polygon, std::array<float,3> li
         toCameraVector[i] = cameraPosition[i] -center[i];
     }
 
-    crossProduct(vectorOne,vectorTwo,normalVector);
+    normalVector = crossProduct(vectorOne,vectorTwo);
 
     float dir = direction(normalVector,toLightVector) + 1.5; // 1.5 to prevent it from going negative, so that direction still matters and to avoid using max(). MAYBE ADJUST
     float dist = distance(center[0] - lightSource[0],center[1] - lightSource[1],center[2] - lightSource[2]);
@@ -54,7 +54,7 @@ void polygonLightning(struct Object& object, int polygon, std::array<float,3> li
 }
 
 void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
-    float center[3],vectorOne[3],vectorTwo[3],normalVector[3],toLightVector[3],toCameraVector[3],halfVector[3];
+    std::array<float,3> center,vectorOne,vectorTwo,normalVector,toLightVector,toCameraVector,halfVector;
     std::vector<std::array<float,3>> vertices = {object.vertices[object.faces[polygon][0]],
         object.vertices[object.faces[polygon][1]], 
         object.vertices[object.faces[polygon][2]]};
@@ -75,7 +75,7 @@ void polygonRefraction(struct Object& object, int polygon, std::array<float,3> l
         halfVector[i] = toLightVector[i] + toCameraVector[i];
     }
 
-    crossProduct(vectorOne,vectorTwo,normalVector);
+    normalVector = crossProduct(vectorOne,vectorTwo);
 
     float shift = direction(normalVector,halfVector);
 
@@ -113,27 +113,21 @@ void handleLighting(struct Objects& objects) {
     }
 }
 
-def project(point,scale):
-    """Project a single coordinate to 2D based on perspective and scaling, or return None if invalid."""
-    projected_point = bound_TR(float(scale))
-    if projected_point is None:
-        return None
-    elif abs(projected_point) < 0.1:
-        // Don't draw the line if it will result in a divide by 0 or near 0 error
-        return None
-    // Calculates the screen coordinate position based on the screen size and FOV bound size its true coordinate position (the last coordinate value)
-    return data.display.half_side * float(point) / float(projected_point)
+void project(struct Objects objects, struct Object object, struct Screen& screen, int vertex) {
+    std::array<float,2> depthResults = depth(objects,object.vertices[vertex]);
+    std::array<float,2> xResults = fieldOfViewBoundSide(objects,object.vertices[vertex]);
+    std::array<float,2> yResults = fieldOfViewBoundUp(objects,object.vertices[vertex]);
 
-def project_to_2d(point_1,point_2):
-    """Project two N-dimensional points to 2D coordinates for rendering, or return None if not visible."""
-    position_1, position_2 = point_1[:], point_2[:]
-    // Continuously projects down a dimension until it reaches 2D
-    while len(position_1) > 2:
-        for i in range(len(position_1) - 1):
-            position_1[i] = project(position_1[i],position_1[-1])
-            position_2[i] = project(position_2[i],position_2[-1])
-            if position_1[i] is None or position_2[i] is None:
-                return None
-        position_1.pop()
-        position_2.pop()
-    return (position_1,position_2)
+    float hidden = 0;
+    if (depthResults[1] > 0.5 || xResults[1] > 0.5 || yResults[1] > 0.5) {
+        hidden = 1;
+    }
+    int x = xResults[0] + SCREEN_X / 2;
+    int y = -yResults[0] + SCREEN_Y / 2;
+    float depth = depthResults[0];
+
+    std::array<float,4> screenVertex = {x,y,depth,hidden};
+    screen.vertices.push_back(screenVertex);
+}
+
+// add function to project all function and copy over faces

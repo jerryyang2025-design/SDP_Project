@@ -7,7 +7,7 @@ container class (class)                                          << to be passed
         playerHitbox[vertex index][coordinate index]
         lightSource[coordinate index]
         cameraPosition[coordinate index]
-        cameraVector[coordinate index]
+        cameraVector[coordinate index]                           << 3x for forward, up, and side
         object (struct)                                          << platforms, moving platforms, end, water
             vertices[vertex index][coordinate index]
             faces[face index][vertex index]
@@ -37,7 +37,8 @@ container class (class)                                          << to be passed
 
     states (struct)                                              << runtime gameplay states and general trash bin I guess
         movement speed limit? maybe unnecessary, idk             << maybe split into player and gameplay states
-        velocity vector
+        persistent velocity vector                               << for jumping and gravity
+        temporary velocity vector                                << for player inputs
         points? idk maybe also stage metadata to prevent double points?
         stage?
         timer?
@@ -53,8 +54,9 @@ container class (class)                                          << to be passed
         yz rotation theta
         total yz angle to avoid looking beyond -90 and 90 degrees
     
-    files (struct)
-        player.obj
+    files (class)
+        load stage function
+        load other stuff functions
         art (struct)
             menu art idk
             cutscene1?
