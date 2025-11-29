@@ -16,12 +16,12 @@ float angle(std::array<float,3> a,std::array<float,3> b);
 
 float magnitudeInDirection(std::array<float,3> a,std::array<float,3> b);
 
-std::array<float,2> depth(struct Objects objects, std::array<float,3> vertex);
+std::array<float,2> depth(const struct Objects& objects, std::array<float,3> vertex);
 
-float depthUp(struct Objects objects, std::array<float,3> vertex);
+float depthUp(const struct Objects& objects, std::array<float,3> vertex);
 
-float depthSide(struct Objects objects, std::array<float,3> vertex);
+float depthSide(const struct Objects& objects, std::array<float,3> vertex);
 
-std::array<float,2> fieldOfViewBoundSide(struct Objects objects, std::array<float,3> vertex);
+std::array<float,2> fieldOfViewBoundSide(const struct Objects& objects, std::array<float,3> vertex);
 
-std::array<float,2> fieldOfViewBoundUp(struct Objects objects, std::array<float,3> vertex);
+std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array<float,3> vertex);

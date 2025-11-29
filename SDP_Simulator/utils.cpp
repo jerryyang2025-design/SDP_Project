@@ -60,7 +60,7 @@ float magnitudeInDirection(std::array<float,3> a,std::array<float,3> b) {
     return dot / (magnitude);
 }
 
-std::array<float,2> depth(struct Objects objects, std::array<float,3> vertex) {
+std::array<float,2> depth(const struct Objects& objects, std::array<float,3> vertex) {
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
@@ -74,7 +74,7 @@ std::array<float,2> depth(struct Objects objects, std::array<float,3> vertex) {
     return {objectDepth,hidden};
 }
 
-float depthUp(struct Objects objects, std::array<float,3> vertex) {
+float depthUp(const struct Objects& objects, std::array<float,3> vertex) {
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
@@ -84,7 +84,7 @@ float depthUp(struct Objects objects, std::array<float,3> vertex) {
     return objectDepth;
 }
 
-float depthSide(struct Objects objects, std::array<float,3> vertex) {
+float depthSide(const struct Objects& objects, std::array<float,3> vertex) {
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
@@ -94,7 +94,7 @@ float depthSide(struct Objects objects, std::array<float,3> vertex) {
     return objectDepth;
 }
 
-std::array<float,2> fieldOfViewBoundSide(struct Objects objects, std::array<float,3> vertex) {
+std::array<float,2> fieldOfViewBoundSide(const struct Objects& objects, std::array<float,3> vertex) {
     float x = depthSide(objects,vertex);
     std::array<float,2> results = depth(objects,vertex);
     float z = results[0];
@@ -112,7 +112,7 @@ std::array<float,2> fieldOfViewBoundSide(struct Objects objects, std::array<floa
     return {projectedX,hidden};
 }
 
-std::array<float,2> fieldOfViewBoundUp(struct Objects objects, std::array<float,3> vertex) {
+std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array<float,3> vertex) {
     float y = depthUp(objects,vertex);
     std::array<float,2> results = depth(objects,vertex);
     float z = results[0];

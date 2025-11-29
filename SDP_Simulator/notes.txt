@@ -3,5 +3,7 @@ check collisions through clipping to a certain distance
 add music
 add cutscenes at the beginning and menu screen art
 create models
+count frames per second and use to calculate expected frames per second in the next second and a sleep time per frame to reach desired frame rate
+use floor and ceiling for polygon box during rendering
 title idea?
     - Warning: Warming

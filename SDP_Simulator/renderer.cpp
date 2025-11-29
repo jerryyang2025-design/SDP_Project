@@ -3,6 +3,7 @@
 #include "utils.h"
 
 #define BRIGHTNESS 3000000 // may adjust depending on light source distance
+#define SNOWCOLOR {30, 30, 30}
 
 void polygonLightning(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
     std::array<float,3> center,vectorOne,vectorTwo,normalVector,toLightVector,toCameraVector,halfVector;
@@ -44,12 +45,12 @@ void polygonLightning(struct Object& object, int polygon, std::array<float,3> li
 
     if (lightValueMultiplier >= 1) {
         for (int i = 0; i < 3; i++) {
-            object.faceColors[polygon][i] = clamp(object.faceColors[polygon][i] * lightValueMultiplier,0,255);
+            object.faceColors[polygon][i] = clamp(object.color[i] * lightValueMultiplier,0,255);
         }
     } else {
-        object.faceColors[polygon][0] = clamp(object.faceColors[polygon][0] * lightValueMultiplier,0,255);
-        object.faceColors[polygon][1] = clamp(object.faceColors[polygon][1] * pow(lightValueMultiplier,0.8),0,255);
-        object.faceColors[polygon][2] = clamp(object.faceColors[polygon][2] * pow(lightValueMultiplier,0.5),0,255); // adjust values
+        object.faceColors[polygon][0] = clamp(object.color[0] * lightValueMultiplier,0,255);
+        object.faceColors[polygon][1] = clamp(object.color[1] * pow(lightValueMultiplier,0.8),0,255);
+        object.faceColors[polygon][2] = clamp(object.color[2] * pow(lightValueMultiplier,0.5),0,255); // adjust values
     }
 }
 
@@ -113,7 +114,7 @@ void handleLighting(struct Objects& objects) {
     }
 }
 
-void project(struct Objects objects, struct Object object, struct Screen& screen, int vertex) {
+void project(const struct Objects& objects, const struct Object& object, struct Screen& screen, int vertex) {
     std::array<float,2> depthResults = depth(objects,object.vertices[vertex]);
     std::array<float,2> xResults = fieldOfViewBoundSide(objects,object.vertices[vertex]);
     std::array<float,2> yResults = fieldOfViewBoundUp(objects,object.vertices[vertex]);
@@ -130,4 +131,85 @@ void project(struct Objects objects, struct Object object, struct Screen& screen
     screen.vertices.push_back(screenVertex);
 }
 
-// add function to project all function and copy over faces
+void projectAll(Container& container) {
+    for (int i = 0; i < container.objects.platforms.size(); i++) {
+        int size = container.screen.vertices.size();
+        for (int j = 0; j < container.objects.platforms[i].vertices.size(); j++) {
+            project(container.objects,container.objects.platforms[i],container.screen,j);
+        }
+        for (int j = 0; j < container.objects.platforms[i].faces.size(); j++) {
+            if (container.screen.vertices[container.objects.platforms[i].faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.platforms[i].faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.platforms[i].faces[j][2] + size][3] < 0.5) {
+                std::array<int,3> face = container.objects.platforms[i].faces[j], faceColor = container.objects.platforms[i].faceColors[j];
+                for (int k = 0; k < 3; k++) {
+                    face[k] += size;
+                }
+                container.screen.faces.push_back(face);
+                container.screen.faceColors.push_back(faceColor);
+            }
+        }
+    }
+    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+        int size = container.screen.vertices.size();
+        for (int j = 0; j < container.objects.movingPlatforms[i].vertices.size(); j++) {
+            project(container.objects,container.objects.movingPlatforms[i],container.screen,j);
+        }
+        for (int j = 0; j < container.objects.movingPlatforms[i].faces.size(); j++) {
+            if (container.screen.vertices[container.objects.movingPlatforms[i].faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].faces[j][2] + size][3] < 0.5) {
+                std::array<int,3> face = container.objects.movingPlatforms[i].faces[j], faceColor = container.objects.movingPlatforms[i].faceColors[j];
+                for (int k = 0; k < 3; k++) {
+                    face[k] += size;
+                }
+                container.screen.faces.push_back(face);
+                container.screen.faceColors.push_back(faceColor);
+            }
+        }
+    }
+    int size = container.screen.vertices.size();
+    for (int j = 0; j < container.objects.end.vertices.size(); j++) {
+        project(container.objects,container.objects.end,container.screen,j);
+    }
+    for (int j = 0; j < container.objects.end.faces.size(); j++) {
+        if (container.screen.vertices[container.objects.end.faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.end.faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.end.faces[j][2] + size][3] < 0.5) {
+            std::array<int,3> face = container.objects.end.faces[j], faceColor = container.objects.end.faceColors[j];
+            for (int k = 0; k < 3; k++) {
+                face[k] += size;
+            }
+            container.screen.faces.push_back(face);
+            container.screen.faceColors.push_back(faceColor);
+        }
+    }
+    size = container.screen.vertices.size();
+    for (int j = 0; j < container.objects.water.vertices.size(); j++) {
+        project(container.objects,container.objects.water,container.screen,j);
+    }
+    for (int j = 0; j < container.objects.water.faces.size(); j++) {
+        if (container.screen.vertices[container.objects.water.faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.water.faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.water.faces[j][2] + size][3] < 0.5) {
+            std::array<int,3> face = container.objects.water.faces[j], faceColor = container.objects.water.faceColors[j];
+            for (int k = 0; k < 3; k++) {
+                face[k] += size;
+            }
+            container.screen.faces.push_back(face);
+            container.screen.faceColors.push_back(faceColor);
+        }
+    }
+}
+
+void colorPolygon(struct Screen& screen, int polygon) {
+    std::array<std::array<float,4>,3> vertices = {screen.vertices[screen.faces[polygon][0]],screen.vertices[screen.faces[polygon][1]],screen.vertices[screen.faces[polygon][2]]};
+    int minX = floor(vertices[0][0]), maxX = ceil(vertices[0][0]), minY = floor(vertices[0][1]), maxY = ceil(vertices[0][1]);
+    for (int i = 0; i < 3; i++) {
+        if (vertices[i][0] < minX) {
+            minX = vertices[i][0];
+        } else if (vertices[i][0] > maxX) {
+            maxX = vertices[i][0];
+        }
+        if (vertices[i][1] < minY) {
+            minX = vertices[i][1];
+        } else if (vertices[i][1] > maxY) {
+            maxX = vertices[i][1];
+        }
+    }
+    // figure out floor and ceiling for the vertices themselves
+}
+// add snow when rendering, add snow color to pixel colors
+// add overall render function that calls all of this

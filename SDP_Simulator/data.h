@@ -16,9 +16,9 @@ struct Object {
 };
 
 struct Objects {
-    std::vector<std::array<float,3>> playerHitbox;
+    std::vector<std::array<float,3>> playerHitbox, snow;
     std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector, cameraUpVector, cameraRightVector; // play around with the values
-    struct Object end, water;
+    struct Object end, water; // default water height of 0
     std::vector<struct Object> platforms, movingPlatforms;
 };
 
@@ -34,8 +34,22 @@ struct Screen {
     std::map<std::array<std::array<int,SCREEN_X>,SCREEN_Y>,std::array<int,3>> currentPixels, previousPixels; // previous to draw only new changes
 };
 
+struct PlayerStates {
+
+};
+
+struct GameStates {
+    int frames = 0;
+};
+
+struct States {
+    struct PlayerStates playerStates;
+    struct GameStates gameStates;
+};
+
 class Container {
     public:
         struct Objects objects; // will add more once the rest are in
         struct Screen screen;
+        struct States states;
 };

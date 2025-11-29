@@ -5,6 +5,7 @@ Let it be known that I hate organizing. Please document any changes/additions to
 container class (class)                                          << to be passed to functions as a parameter
     objects (struct)                                             << add camera point and vector
         playerHitbox[vertex index][coordinate index]
+        snow[vertex index][coordinate index]
         lightSource[coordinate index]
         cameraPosition[coordinate index]
         cameraVector[coordinate index]                           << 3x for forward, up, and side
