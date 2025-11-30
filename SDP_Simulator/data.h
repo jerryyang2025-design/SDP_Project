@@ -2,10 +2,11 @@
 
 #include <vector>
 #include <array>
-#include <map>
+#include <limits>
 
 #define SCREEN_X 320
 #define SCREEN_Y 240
+#define FPS 30
 
 struct Object {
     std::vector<std::array<float,3>> vertices;
@@ -17,21 +18,33 @@ struct Object {
 
 struct Objects {
     std::vector<std::array<float,3>> playerHitbox, snow;
-    std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector, cameraUpVector, cameraRightVector; // play around with the values
+    std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}; // play around with the light position
+    std::array<int,3> backgroundColor;
     struct Object end, water; // default water height of 0
     std::vector<struct Object> platforms, movingPlatforms;
 };
 
 struct line {
-    int y, x1, x2;
-    char color[12]; // color converted to hexadecimal
+    int y, x1 = -1, x2;
+    unsigned color; // color converted to hexadecimal
 };
 
 struct Screen {
     std::vector<std::array<float,4>> vertices; // stored as a float to keep accurate depth value (not z, find projection with cameraVector), and in or out of view
+    std::vector<std::array<float,3>> effects;
     std::vector<std::array<int,3>> faces, faceColors;
-    std::map<std::array<std::array<int,SCREEN_X>,SCREEN_Y>,float> depths; // used for z buffer
-    std::map<std::array<std::array<int,SCREEN_X>,SCREEN_Y>,std::array<int,3>> currentPixels, previousPixels; // previous to draw only new changes
+    std::array<std::array<float,SCREEN_X>,SCREEN_Y> depths; // used for z buffer
+    std::array<std::array<std::array<int,3>,SCREEN_X>,SCREEN_Y> currentPixels, previousPixels = {}; // previous to draw only new changes
+    std::vector<struct line> lines;
+
+    Screen() {
+        std::array<float, SCREEN_X> tempRow;
+        tempRow.fill(std::numeric_limits<float>::infinity());
+
+        for (int i = 0; i < SCREEN_Y; i++) {
+            depths[i] = tempRow;
+        }
+    }
 };
 
 struct PlayerStates {

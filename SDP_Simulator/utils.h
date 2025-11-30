@@ -25,3 +25,13 @@ float depthSide(const struct Objects& objects, std::array<float,3> vertex);
 std::array<float,2> fieldOfViewBoundSide(const struct Objects& objects, std::array<float,3> vertex);
 
 std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array<float,3> vertex);
+
+float depth(const std::array<std::array<float,4>,3>& polygon, const std::array<int,2>& point);
+
+int cross2d(const std::array<int,2> &v, const std::array<int,2> &w);
+
+bool sameSide(const std::array<int,2> &p1, const std::array<int,2> &p2, const std::array<int,2> &A, const std::array<int,2> &B);
+
+bool pointInTriangle(const std::array<std::array<float,4>,3> &polygon, const std::array<int,2> &point);
+
+unsigned int rgbToHex(int r, int g, int b);

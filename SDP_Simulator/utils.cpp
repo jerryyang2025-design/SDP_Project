@@ -129,3 +129,40 @@ std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array
     float projectedY = y * (SCREEN_Y / 2) / screenAtZ;
     return {projectedY,hidden};
 }
+
+float depth(const std::array<std::array<float,4>,3>& polygon, const std::array<int,2>& point) {
+    float coordinateOne = (polygon[1][1] - polygon[2][1]) * (point[0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (point[1] - polygon[2][1]);
+    coordinateOne /= ((polygon[1][1] - polygon[2][1]) * (polygon[0][0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (polygon[0][1] - polygon[2][1]));
+    float coordinateTwo = (polygon[2][1] - polygon[0][1]) * (point[0] - polygon[2][0]) + (polygon[0][0] - polygon[2][0]) * (point[1] - polygon[2][1]);
+    coordinateTwo /= ((polygon[1][1] - polygon[2][1]) * (polygon[0][0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (polygon[0][1] - polygon[2][1]));
+    float coordinateThree = 1 - coordinateOne - coordinateTwo;
+    return coordinateOne * polygon[0][2] + coordinateTwo * polygon[1][2] + coordinateThree * polygon[2][2];
+}
+
+int cross2d(const std::array<int,2> &v, const std::array<int,2> &w) {
+    return v[0] * w[1] - v[1] * w[0];
+}
+
+bool sameSide(const std::array<int,2> &p1, const std::array<int,2> &p2, const std::array<int,2> &A, const std::array<int,2> &B) {
+    std::array<int, 2> AB {B[0] - A[0], B[1] - A[1]};
+    std::array<int, 2> AP1 {p1[0] - A[0], p1[1] - A[1]};
+    std::array<int, 2> AP2 {p2[0] - A[0], p2[1] - A[1]};
+    return cross2d(AB, AP1) * cross2d(AB, AP2) >= 0;
+}
+
+bool pointInTriangle(const std::array<std::array<float,4>,3> &polygon, const std::array<int,2> &point) {
+    std::array<int,2> A = {polygon[0][0], polygon[0][1]};
+    std::array<int,2> B = {polygon[1][0], polygon[1][1]};
+    std::array<int,2> C = {polygon[2][0], polygon[2][1]};
+    return sameSide(point, C, A, B) && sameSide(point, A, B, C) && sameSide(point, B, C, A);
+}
+
+unsigned int rgbToHex(int r, int g, int b) {
+    return (r << 16) | (g << 8) | b;
+}
+
+int manageFPS(int time) {
+    float desiredTime = 1000.0 / FPS;
+    int sleepTime = clamp(round(desiredTime - time),0,1000);
+    return sleepTime;
+}
