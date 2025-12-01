@@ -336,7 +336,6 @@ void colorAll(Container& container) {
     for (int i = 0; i < container.screen.effects.size(); i++) {
         colorSnow(container.screen,i);
     }
-    container.screen.previousPixels = container.screen.currentPixels;
 }
 
 /*
@@ -350,7 +349,7 @@ void findLines(Container& container) {
         struct line newline;
         for (int j = 0; j < SCREEN_X; j++) {
             std::array<int,3> testColor = container.screen.currentPixels[i][j];
-            if (equals(container.screen.currentPixels[i][j],container.screen.previousPixels[i][j])) {
+            if (!equals(container.screen.currentPixels[i][j],container.screen.previousPixels[i][j])) {
                 if (lineInProgress && newline.color != rgbToHex(testColor[0],testColor[1],testColor[2])) {
                     newline.x2 = j - 1;
                     container.screen.lines.push_back(newline);
@@ -374,6 +373,7 @@ void findLines(Container& container) {
             }
         }
     }
+    container.screen.previousPixels = container.screen.currentPixels;
 }
 
 /*
