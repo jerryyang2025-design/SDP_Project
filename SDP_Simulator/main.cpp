@@ -7,7 +7,7 @@ int main()
     // test object
     Container* container = new Container();
 
-    (*container).objects.backgroundColor = {100, 100, 100};
+    (*container).objects.backgroundColor = {130, 160, 200};
     (*container).objects.cameraPosition = {0, 100, 0};
     Object* object = new Object();
     object->center = {0, 100, 200};

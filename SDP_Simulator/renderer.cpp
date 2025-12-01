@@ -5,7 +5,7 @@
 #include "renderer.h"
 
 #define BRIGHTNESS 110000000 // may adjust depending on light source distance
-#define SNOWCOLOR 50
+#define SNOWCOLOR 30
 #define SNOWSIZE 5
 
 /*
