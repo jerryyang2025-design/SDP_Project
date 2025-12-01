@@ -12,13 +12,13 @@ struct Object {
     std::vector<std::array<float,3>> vertices;
     std::vector<std::array<int,3>> faces, faceColors, hitbox;
     std::array<float,3> center, color;
-    int reflectionValue;
-    int refractionValue;
+    float reflectionValue;
+    float refractionValue;
 };
 
 struct Objects {
     std::vector<std::array<float,3>> playerHitbox, snow;
-    std::array<float,3> lightSource = {-1000,1000,-1000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}; // play around with the light position
+    std::array<float,3> lightSource = {-10000,10000,-10000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}; // play around with the light position
     std::array<int,3> backgroundColor;
     struct Object end, water; // default water height of 0
     std::vector<struct Object> platforms, movingPlatforms;
@@ -30,7 +30,7 @@ struct line {
 };
 
 struct Screen {
-    std::vector<std::array<float,4>> vertices; // stored as a float to keep accurate depth value (not z, find projection with cameraVector), and in or out of view
+    std::vector<std::array<float,4>> vertices = {}; // stored as a float to keep accurate depth value (not z, find projection with cameraVector), and in or out of view
     std::vector<std::array<float,3>> effects;
     std::vector<std::array<int,3>> faces, faceColors;
     std::array<std::array<float,SCREEN_X>,SCREEN_Y> depths; // used for z buffer
@@ -48,7 +48,7 @@ struct Screen {
 };
 
 struct PlayerStates {
-
+    int placeholder;
 };
 
 struct GameStates {

@@ -2,8 +2,9 @@
 #include "FEHLCD.h"
 #include "data.h"
 #include "utils.h"
+#include "renderer.h"
 
-#define BRIGHTNESS 3000000 // may adjust depending on light source distance
+#define BRIGHTNESS 110000000 // may adjust depending on light source distance
 #define SNOWCOLOR 50
 #define SNOWSIZE 5
 
@@ -266,19 +267,19 @@ void colorPolygon(struct Screen& screen, int polygon) {
             maxY = vertices[i][1];
         }
     }
+    minX = clamp(minX,0,SCREEN_X - 1);
+    maxX = clamp(maxX,0,SCREEN_X - 1);
+    minY = clamp(minY,0,SCREEN_Y - 1);
+    maxY = clamp(maxY,0,SCREEN_Y - 1);
     
     for (int i = minY;i <= maxY;i++) {
-        if (i >= 0 && i < SCREEN_Y) {
-            for (int j = minX;j <= maxX;j++) {
-                if (j >= 0 && j < SCREEN_X) {
-                    std::array<int,2> pixel = {j,i};
-                    if (pointInTriangle(vertices,pixel)) {
-                        float testDepth = depth(vertices,pixel);
-                        if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
-                            screen.depths[i][j] = testDepth;
-                            screen.currentPixels[i][j] = screen.faceColors[polygon];
-                        }
-                    }
+        for (int j = minX;j <= maxX;j++) {
+            std::array<int,2> pixel = {j,i};
+            if (pointInTriangle(vertices,pixel)) {
+                float testDepth = depth(vertices,pixel);
+                if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
+                    screen.depths[i][j] = testDepth;
+                    screen.currentPixels[i][j] = screen.faceColors[polygon];
                 }
             }
         }
@@ -298,19 +299,19 @@ void colorSnow(struct Screen& screen, int snow) {
         radius = round(SNOWSIZE / 0.2);
     }
     int minX = point[0] - radius, maxX = point[0] + radius, minY = point[1] - radius, maxY = point[1] + radius;
-    
+    minX = clamp(minX,0,SCREEN_X - 1);
+    maxX = clamp(maxX,0,SCREEN_X - 1);
+    minY = clamp(minY,0,SCREEN_Y - 1);
+    maxY = clamp(maxY,0,SCREEN_Y - 1);
+
     for (int i = minY;i <= maxY;i++) {
-        if (i >= 0 && i < SCREEN_Y) {
-            for (int j = minX;j <= maxX;j++) {
-                if (j >= 0 && j < SCREEN_X) {
-                    if (pythag(j - point[0],i - point[1]) <= radius) {
-                        float testDepth = point[2];
-                        if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
-                            screen.currentPixels[i][j][0] = clamp(screen.currentPixels[i][j][0] + SNOWCOLOR,0,255);
-                            screen.currentPixels[i][j][1] = clamp(screen.currentPixels[i][j][1] + SNOWCOLOR,0,255);
-                            screen.currentPixels[i][j][2] = clamp(screen.currentPixels[i][j][2] + SNOWCOLOR,0,255);
-                        }
-                    }
+        for (int j = minX;j <= maxX;j++) {
+            if (pythag(j - point[0],i - point[1]) <= radius) {
+                float testDepth = point[2];
+                if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
+                    screen.currentPixels[i][j][0] = clamp(screen.currentPixels[i][j][0] + SNOWCOLOR,0,255);
+                    screen.currentPixels[i][j][1] = clamp(screen.currentPixels[i][j][1] + SNOWCOLOR,0,255);
+                    screen.currentPixels[i][j][2] = clamp(screen.currentPixels[i][j][2] + SNOWCOLOR,0,255);
                 }
             }
         }
@@ -322,13 +323,11 @@ Function to color the screen
 */
 
 void colorAll(Container& container) {
-    std::array<std::array<int,3>,SCREEN_X> tempRows;
-    std::array<float, SCREEN_X> tempDepths;
-    tempDepths.fill(std::numeric_limits<float>::infinity());
-    tempRows.fill(container.objects.backgroundColor);
     for (int i = 0; i < SCREEN_Y; i++) {
-        container.screen.currentPixels[i] = tempRows;
-        container.screen.depths[i] = tempDepths;
+        for (int j = 0; j < SCREEN_X; j++) {
+            container.screen.currentPixels[i][j] = container.objects.backgroundColor;
+            container.screen.depths[i][j] = std::numeric_limits<float>::infinity();
+        }
     }
 
     for (int i = 0; i < container.screen.faces.size(); i++) {
@@ -351,7 +350,7 @@ void findLines(Container& container) {
         struct line newline;
         for (int j = 0; j < SCREEN_X; j++) {
             std::array<int,3> testColor = container.screen.currentPixels[i][j];
-            if (container.screen.currentPixels[i][j] != container.screen.previousPixels[i][j]) {
+            if (equals(container.screen.currentPixels[i][j],container.screen.previousPixels[i][j])) {
                 if (lineInProgress && newline.color != rgbToHex(testColor[0],testColor[1],testColor[2])) {
                     newline.x2 = j - 1;
                     container.screen.lines.push_back(newline);
@@ -384,7 +383,7 @@ Function to draw all lines on the screen
 void drawScreen(Container& container) {
     for (int i = 0; i < container.screen.lines.size(); i++) {
         LCD.SetFontColor(container.screen.lines[i].color);
-        LCD.DrawHorizontalLine(container.screen.lines[i].y,container.screen.lines[i].x1,container.screen.lines[i].x2);
+        LCD.DrawHorizontalLine(container.screen.lines[i].y,container.screen.lines[i].x1,container.screen.lines[i].x2 + 1);
     }
 }
 

@@ -64,7 +64,7 @@ std::array<float,2> depth(const struct Objects& objects, std::array<float,3> ver
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
-        toCameraVector[i] = objects.cameraPosition[i] - vertex[i];
+        toCameraVector[i] = -objects.cameraPosition[i] + vertex[i];
     }
     float objectDepth = magnitudeInDirection(objects.cameraVector,toCameraVector);
     float hidden = 0;
@@ -78,7 +78,7 @@ float depthUp(const struct Objects& objects, std::array<float,3> vertex) {
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
-        toCameraVector[i] = objects.cameraPosition[i] - vertex[i];
+        toCameraVector[i] = -objects.cameraPosition[i] + vertex[i];
     }
     float objectDepth = magnitudeInDirection(objects.cameraUpVector,toCameraVector);
     return objectDepth;
@@ -88,7 +88,7 @@ float depthSide(const struct Objects& objects, std::array<float,3> vertex) {
     std::array<float,3> toCameraVector;
 
     for (int i = 0; i < 3; i++) {
-        toCameraVector[i] = objects.cameraPosition[i] - vertex[i];
+        toCameraVector[i] = -objects.cameraPosition[i] + vertex[i];
     }
     float objectDepth = magnitudeInDirection(objects.cameraRightVector,toCameraVector);
     return objectDepth;
@@ -139,18 +139,18 @@ float depth(const std::array<std::array<float,4>,3>& polygon, const std::array<i
     return coordinateOne * polygon[0][2] + coordinateTwo * polygon[1][2] + coordinateThree * polygon[2][2];
 }
 
-int cross2d(const std::array<int,2> &v, const std::array<int,2> &w) {
+int cross2d(const std::array<int,2>& v, const std::array<int,2>& w) {
     return v[0] * w[1] - v[1] * w[0];
 }
 
-bool sameSide(const std::array<int,2> &p1, const std::array<int,2> &p2, const std::array<int,2> &A, const std::array<int,2> &B) {
+bool sameSide(const std::array<int,2>& p1, const std::array<int,2>& p2, const std::array<int,2>& A, const std::array<int,2>& B) {
     std::array<int, 2> AB {B[0] - A[0], B[1] - A[1]};
     std::array<int, 2> AP1 {p1[0] - A[0], p1[1] - A[1]};
     std::array<int, 2> AP2 {p2[0] - A[0], p2[1] - A[1]};
     return cross2d(AB, AP1) * cross2d(AB, AP2) >= 0;
 }
 
-bool pointInTriangle(const std::array<std::array<float,4>,3> &polygon, const std::array<int,2> &point) {
+bool pointInTriangle(const std::array<std::array<float,4>,3>& polygon, const std::array<int,2>& point) {
     std::array<int,2> A = {polygon[0][0], polygon[0][1]};
     std::array<int,2> B = {polygon[1][0], polygon[1][1]};
     std::array<int,2> C = {polygon[2][0], polygon[2][1]};
@@ -159,6 +159,10 @@ bool pointInTriangle(const std::array<std::array<float,4>,3> &polygon, const std
 
 unsigned int rgbToHex(int r, int g, int b) {
     return (r << 16) | (g << 8) | b;
+}
+
+bool equals(const std::array<int,3>& color1, const std::array<int,3>& color2) {
+    return color1[0] == color2[0] && color1[1] == color2[1] && color1[2] == color2[2];
 }
 
 int manageFPS(int time) {
