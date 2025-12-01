@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 float clamp(float value, float min, float max);
 
 float dotProduct(std::array<float,3> a,std::array<float,3> b);

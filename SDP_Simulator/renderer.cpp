@@ -398,4 +398,5 @@ void render(Container& container) {
     colorAll(container);
     findLines(container);
     drawScreen(container);
+    LCD.Update();
 }

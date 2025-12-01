@@ -165,4 +165,4 @@ int manageFPS(int time) {
     float desiredTime = 1000.0 / FPS;
     int sleepTime = clamp(round(desiredTime - time),0,1000);
     return sleepTime;
-}
+} // probably unnecessary, needs testing to be sure
