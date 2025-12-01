@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "renderer.h"
 
-#define BRIGHTNESS 110000000 // may adjust depending on light source distance
+#define BRIGHTNESS 120000000 // may adjust depending on light source distance
 #define SNOWCOLOR 30
 #define SNOWSIZE 5
 
@@ -28,7 +28,7 @@ void polygonLightning(struct Object& object, int polygon, std::array<float,3> li
 
     normalVector = crossProduct(vectorOne,vectorTwo);
 
-    float dir = direction(normalVector,toLightVector) + 1.5; // 1.5 to prevent it from going negative, so that direction still matters and to avoid using max(). MAYBE ADJUST
+    float dir = clamp(direction(normalVector,toLightVector) / 2 + 1,0.5,1.5); // 1.5 to prevent it from going negative, so that direction still matters and to avoid using max(). MAYBE ADJUST
     float dist = distance(center[0] - lightSource[0],center[1] - lightSource[1],center[2] - lightSource[2]);
 
     float magnitudeOne = distance(toLightVector[0],toLightVector[1],toLightVector[2]);
