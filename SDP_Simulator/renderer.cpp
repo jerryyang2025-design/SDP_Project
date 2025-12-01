@@ -277,9 +277,11 @@ void colorPolygon(struct Screen& screen, int polygon) {
             std::array<int,2> pixel = {j,i};
             if (pointInTriangle(vertices,pixel)) {
                 float testDepth = depth(vertices,pixel);
-                if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
-                    screen.depths[i][j] = testDepth;
-                    screen.currentPixels[i][j] = screen.faceColors[polygon];
+                if (testDepth > 0) {
+                    if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
+                        screen.depths[i][j] = testDepth;
+                        screen.currentPixels[i][j] = screen.faceColors[polygon];
+                    }
                 }
             }
         }
