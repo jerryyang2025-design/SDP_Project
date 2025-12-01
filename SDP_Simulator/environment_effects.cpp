@@ -45,6 +45,11 @@ void handleSnow(Container& container) {
     }
 }
 
+void handleEnvironmentAnimations(Container& container) {
+    handleWaves(container);
+    handleSnow(container);
+}
+
 // add platform moving function, don't forget to move hitbox too
 // have a temporary velocity for the platforms, add it to player temp velocity if collision detected
 
