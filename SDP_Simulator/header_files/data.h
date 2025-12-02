@@ -48,11 +48,12 @@ struct Screen {
 };
 
 struct PlayerStates {
-    int placeholder;
+    std::array<float,3> tempVelocity = {}, persistentVelocity = {};
 };
 
 struct GameStates {
     int frames = 0;
+    bool pause = false;
 };
 
 struct States {
