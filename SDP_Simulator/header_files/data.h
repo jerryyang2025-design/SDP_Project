@@ -60,11 +60,17 @@ struct States {
     struct GameStates gameStates;
 };
 
+struct Art {
+    char menu[30] = "art/menu_art.png";
+};
+
 class Files {
     private:
-
+        // have stage object files here
     public:
-        void loadFile();
+        struct Art art;
+        // probably add one for music and sound effects too
+        void loadFile(char fileName[30]);
         void loadStage();
 };
 
@@ -73,4 +79,5 @@ class Container {
         struct Objects objects; // will add more once the rest are in
         struct Screen screen;
         struct States states;
+        Files files;
 };

@@ -1,7 +1,7 @@
 #include <math.h>
 #include "FEHRandom.h"
-#include "data.h"
-#include "utils.h"
+#include "header_files/data.h"
+#include "header_files/utils.h"
 
 #define WAVEHEIGHT 10
 #define SNOWSPEED 10

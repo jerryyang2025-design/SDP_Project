@@ -1,8 +1,8 @@
 #include <math.h>
 #include "FEHLCD.h"
-#include "data.h"
-#include "utils.h"
-#include "renderer.h"
+#include "header_files/data.h"
+#include "header_files/utils.h"
+#include "header_files/renderer.h"
 
 #define BRIGHTNESS 120000000 // may adjust depending on light source distance
 #define SNOWCOLOR 30

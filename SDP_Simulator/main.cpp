@@ -1,7 +1,7 @@
 #include "FEHLCD.h"
 #include "FEHImages.h"
-#include "renderer.h"
-#include "menu.h"
+#include "header_files/renderer.h"
+#include "header_files/menu.h"
 
 int main()
 {
@@ -37,12 +37,12 @@ int main()
     // render(*container);
 
     while (1) {
-        drawMenu();
+        drawMenu(*container);
 
         float x, y;
 
         if (LCD.Touch(&x, &y)) {
-            while (LCD.Touch(&x, &y));
+            while (LCD.Touch(&x, &y)); // makes sure it doesn't spam between menu and other screens
             if (x >= 195 && x <= 305) {
                 if (y >= 20 && y <= 65) {
                     stageSelect(*container);

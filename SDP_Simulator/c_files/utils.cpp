@@ -1,6 +1,7 @@
 #include <math.h>
-#include "utils.h"
-#include "data.h"
+#include <sstream>
+#include "header_files/utils.h"
+#include "header_files/data.h"
 
 #define EPSILON 1e-6
 #define NEAR_PLANE 1.0f
@@ -164,6 +165,18 @@ unsigned int rgbToHex(int r, int g, int b) {
 
 bool equals(const std::array<int,3>& color1, const std::array<int,3>& color2) {
     return color1[0] == color2[0] && color1[1] == color2[1] && color1[2] == color2[2];
+}
+
+std::vector<std::string> split(const std::string& s, char delim) {
+    std::vector<std::string> parts;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delim)) {
+        parts.push_back(item);
+    }
+
+    return parts;
 }
 
 int manageFPS(int time) {

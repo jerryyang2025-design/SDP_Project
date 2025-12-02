@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 float clamp(float value, float min, float max);
 
@@ -39,3 +40,5 @@ bool pointInTriangle(const std::array<std::array<float,4>,3>& polygon, const std
 unsigned int rgbToHex(int r, int g, int b);
 
 bool equals(const std::array<int,3>& color1, const std::array<int,3>& color2);
+
+std::vector<std::string> split(const std::string& s, char delim);

@@ -1,10 +1,10 @@
 #include "FEHLCD.h"
 #include "FEHImages.h"
-#include "menu.h"
+#include "header_files/menu.h"
 
-void drawMenu() {
+void drawMenu(Container& container) {
     FEHImage menu;
-    menu.Open("menu_art.png");
+    menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
 
     LCD.SetFontColor(WHITE);
@@ -25,9 +25,9 @@ void drawMenu() {
     */
 }
 
-void drawStage() {
+void drawStage(Container& container) {
     FEHImage menu;
-    menu.Open("menu_art.png");
+    menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
 
     LCD.SetFontColor(GRAY);
@@ -64,7 +64,7 @@ void drawStage() {
 }
 
 void stageSelect(Container& container) {
-    drawStage();
+    drawStage(container);
 
     while (1) {
         float x, y;

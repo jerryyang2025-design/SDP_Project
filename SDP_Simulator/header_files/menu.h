@@ -3,4 +3,4 @@
 #include "data.h"
 
 void stageSelect(Container& container);
-void drawMenu();
+void drawMenu(Container& container);
