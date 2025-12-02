@@ -60,6 +60,14 @@ struct States {
     struct GameStates gameStates;
 };
 
+class Files {
+    private:
+
+    public:
+        void loadFile();
+        void loadStage();
+};
+
 class Container {
     public:
         struct Objects objects; // will add more once the rest are in
