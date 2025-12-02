@@ -44,12 +44,18 @@ int main()
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y)); // makes sure it doesn't spam between menu and other screens
             if (x >= 195 && x <= 305) {
-                if (y >= 20 && y <= 65) {
+                if (y >= 15 && y <= 60) {
                     stageSelect(*container);
                 }
-                /*
-                Add more options here
-                */
+                if (y >= 65 && y <= 110) {
+                    statsPage(*container);
+                }
+                if (y >= 115 && y <= 160) {
+                    instructions(*container);
+                }
+                if (y >= 165 && y <= 210) {
+                    credits(*container);
+                }
             }
         }
 
