@@ -7,6 +7,8 @@
 #define SCREEN_X 320
 #define SCREEN_Y 240
 #define FPS 30
+#define NUMBEROFFILES 1
+#define NUMBEROFSTAGES 3
 
 struct Object {
     std::vector<std::array<float,3>> vertices;
@@ -49,6 +51,7 @@ struct Screen {
 
 struct PlayerStates {
     std::array<float,3> tempVelocity = {}, persistentVelocity = {};
+    std::array<int,2> onGround; // index one, 0 = false, 1 = true; index 2, 1 2 3 4 for object type
 };
 
 struct GameStates {
@@ -65,14 +68,27 @@ struct Art {
     char menu[30] = "art/menu_art.png";
 };
 
+struct FileData {
+    std::array<float,3> center;
+    float size;
+};
+
+struct StageData {
+    std::array<int,3> backgroundColor;
+    std::array<float,3> camera;
+};
+
 class Files {
     private:
+        std::array<struct FileData, NUMBEROFFILES> fileMetaData;
+        std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
         // have stage object files here
     public:
         struct Art art;
         // probably add one for music and sound effects too
-        void loadFile(char fileName[30]);
-        void loadStage();
+        void loadFile(Container& container, char fileName[30]);
+        void loadStage(Container& container, int stage);
+        Files();
 };
 
 class Container {
