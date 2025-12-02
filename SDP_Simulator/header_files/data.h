@@ -64,6 +64,11 @@ struct States {
     struct GameStates gameStates;
 };
 
+struct Rotation {
+    std::array<float,2> previousMouse, currentMouse;
+    float xzRotation=0, yzRotation=0, total_yzRotation=0;
+};
+
 struct Art {
     char menu[30] = "art/menu_art.png";
 };
@@ -96,5 +101,6 @@ class Container {
         struct Objects objects; // will add more once the rest are in
         struct Screen screen;
         struct States states;
+        struct Rotation rotation;
         Files files;
 };
