@@ -7,6 +7,7 @@
 #define BRIGHTNESS 120000000 // may adjust depending on light source distance
 #define SNOWCOLOR 30
 #define SNOWSIZE 5
+#define NEAR_PLANE 1.0f
 
 /*
 Function to calculate the brightness value of a single polygon
@@ -276,7 +277,7 @@ void colorPolygon(struct Screen& screen, int polygon) {
         for (int j = minX;j <= maxX;j++) {
             std::array<int,2> pixel = {j,i};
             if (pointInTriangle(vertices,pixel)) {
-                float testDepth = depth(vertices,pixel);
+                float testDepth = fragDepth(vertices,pixel);
                 if (testDepth > 0) {
                     if (screen.depths[i][j] == std::numeric_limits<float>::infinity() || testDepth < screen.depths[i][j]) {
                         screen.depths[i][j] = testDepth;

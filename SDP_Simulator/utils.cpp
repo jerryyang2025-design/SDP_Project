@@ -3,6 +3,7 @@
 #include "data.h"
 
 #define EPSILON 1e-6
+#define NEAR_PLANE 1.0f
 
 float clamp(float value, float min, float max) {
     if (value < min) {
@@ -68,7 +69,7 @@ std::array<float,2> depth(const struct Objects& objects, std::array<float,3> ver
     }
     float objectDepth = magnitudeInDirection(objects.cameraVector,toCameraVector);
     float hidden = 0;
-    if (objectDepth < 0) {
+    if (objectDepth <= NEAR_PLANE) {
         hidden = 1; // 0 for not hidden, 1 for hidden
     }
     return {objectDepth,hidden};
@@ -98,17 +99,16 @@ std::array<float,2> fieldOfViewBoundSide(const struct Objects& objects, std::arr
     float x = depthSide(objects,vertex);
     std::array<float,2> results = depth(objects,vertex);
     float z = results[0];
-    float screenAtZ = SCREEN_X / SCREEN_Y * z;
-    float hidden = results[1];
-    if (hidden < 0.5) { // checks if it's already hidden
-        if (fabs(x) > screenAtZ) {
-            hidden = 1;
-        }
+    float hidden = 0;
+    float projectedX;
+    if (fabs(z) < NEAR_PLANE) {
+        projectedX = x * (SCREEN_X / 2);
+    } else {
+        projectedX = x * (SCREEN_X / 2) / z;
     }
-    if (fabs(screenAtZ) < EPSILON) {
-        return {x * (SCREEN_Y / 2),hidden};
+    if (fabs(projectedX) > (SCREEN_X / 2)) {
+        hidden = 1;
     }
-    float projectedX = x * (SCREEN_X / 2) / screenAtZ;
     return {projectedX,hidden};
 }
 
@@ -116,25 +116,26 @@ std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array
     float y = depthUp(objects,vertex);
     std::array<float,2> results = depth(objects,vertex);
     float z = results[0];
-    float screenAtZ = z;
-    float hidden = results[1];
-    if (hidden < 0.5) { // checks if it's already hidden
-        if (fabs(y) > screenAtZ) {
-            hidden = 1;
-        }
+    float hidden = 0;
+    float projectedY;
+    if (fabs(z) < NEAR_PLANE) {
+        projectedY = y * (SCREEN_Y / 2);
+    } else {
+        projectedY = y * (SCREEN_Y / 2) / z;
     }
-    if (fabs(screenAtZ) < EPSILON) {
-        return {y * (SCREEN_Y / 2),hidden};
+    if (fabs(projectedY) > (SCREEN_Y / 2)) {
+        hidden = 1;
     }
-    float projectedY = y * (SCREEN_Y / 2) / screenAtZ;
     return {projectedY,hidden};
 }
 
-float depth(const std::array<std::array<float,4>,3>& polygon, const std::array<int,2>& point) {
+float fragDepth(const std::array<std::array<float,4>,3>& polygon, const std::array<int,2>& point) {
     float coordinateOne = (polygon[1][1] - polygon[2][1]) * (point[0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (point[1] - polygon[2][1]);
     coordinateOne /= ((polygon[1][1] - polygon[2][1]) * (polygon[0][0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (polygon[0][1] - polygon[2][1]));
+    
     float coordinateTwo = (polygon[2][1] - polygon[0][1]) * (point[0] - polygon[2][0]) + (polygon[0][0] - polygon[2][0]) * (point[1] - polygon[2][1]);
     coordinateTwo /= ((polygon[1][1] - polygon[2][1]) * (polygon[0][0] - polygon[2][0]) + (polygon[2][0] - polygon[1][0]) * (polygon[0][1] - polygon[2][1]));
+    
     float coordinateThree = 1 - coordinateOne - coordinateTwo;
     return coordinateOne * polygon[0][2] + coordinateTwo * polygon[1][2] + coordinateThree * polygon[2][2];
 }
