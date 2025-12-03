@@ -179,6 +179,19 @@ std::vector<std::string> split(const std::string& s, char delim) {
     return parts;
 }
 
+std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, float scale) { // test heavily
+    std::array<std::array<float,3>,9> temp;
+    int index = 0;
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            std::array<float,3> vertex = {center[0] + j * scale,center[1] - PLAYER_HEIGHT,center[2] + i * scale};
+            temp[index] = vertex;
+            index++;
+        }
+    }
+    return temp;
+}
+
 int manageFPS(int time) {
     float desiredTime = 1000.0 / FPS;
     int sleepTime = clamp(round(desiredTime - time),0,1000);

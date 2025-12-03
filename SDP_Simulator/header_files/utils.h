@@ -43,3 +43,5 @@ unsigned int rgbToHex(int r, int g, int b);
 bool equals(const std::array<int,3>& color1, const std::array<int,3>& color2);
 
 std::vector<std::string> split(const std::string& s, char delim);
+
+std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, float scale);

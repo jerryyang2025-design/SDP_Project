@@ -98,6 +98,7 @@ void stageSelect(Container& container) {
                     return;
                 }
                 if (y >= 60 && y <= 105) {
+                    // load stage
                     // Run game or something
                 }
                 /*
@@ -233,5 +234,15 @@ void credits(Container& container) {
         }
 
         LCD.Update();
+    }
+}
+
+void runGame(Container& container) {
+    while (!container.states.gameStates.pause) {
+        // environment effects
+        // idk movement, collision?
+        // check states?
+        // render
+        // probably more I'm forgetting
     }
 }
