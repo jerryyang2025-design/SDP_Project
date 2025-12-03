@@ -2,6 +2,7 @@
 #include <string>
 #include "header_files/data.h"
 #include "header_files/utils.h"
+#include "header_files/environment_effects.h"
 
 #define ICECOLOR {230, 230, 240}
 #define WATERCOLOR {230, 230, 240}
@@ -32,24 +33,36 @@ void Files::loadFile(Container& container, const std::string& fileName) {
 
     if (objectType[1] == "floe") {
         type = 1;
+        struct Object platform;
+        container.objects.platforms.push_back(platform); // make sure to load them in the stated order
         container.objects.platforms[index].color = ICECOLOR;
         container.objects.platforms[index].reflectionValue = ICEREFLECTION;
         container.objects.platforms[index].refractionValue = ICEREFRACTION;
         container.objects.platforms[index].center = fileMetaData[fileID].center;
     } else if (objectType[1] == "move") {
         type = 2;
+        struct Object platform;
+        container.objects.movingPlatforms.push_back(platform);
         container.objects.movingPlatforms[index].color = ICECOLOR;
         container.objects.movingPlatforms[index].reflectionValue = ICEREFLECTION;
         container.objects.movingPlatforms[index].refractionValue = ICEREFRACTION;
         container.objects.movingPlatforms[index].center = fileMetaData[fileID].center;
     } else if (objectType[1] == "end") {
         type = 3;
+        container.objects.end.vertices.clear();
+        container.objects.end.faces.clear();
+        container.objects.end.faceColors.clear();
+        container.objects.end.hitbox.clear();
         container.objects.end.color = ICECOLOR;
         container.objects.end.reflectionValue = ICEREFLECTION;
         container.objects.end.refractionValue = ICEREFRACTION;
         container.objects.end.center = fileMetaData[fileID].center;
     } else if (objectType[1] == "water") {
         type = 4;
+        container.objects.water.vertices.clear();
+        container.objects.water.faces.clear();
+        container.objects.water.faceColors.clear();
+        container.objects.water.hitbox.clear();
         container.objects.water.color = WATERCOLOR;
         container.objects.water.reflectionValue = WATERREFLECTION;
         container.objects.water.refractionValue = WATERREFRACTION;
@@ -102,6 +115,36 @@ void Files::loadFile(Container& container, const std::string& fileName) {
     file.close();
 }
 
+void resetData(Container& container) { // does not reset end or water, since those will be in every stage and will be overwritten regardless
+    container.states.gameStates.frames = 0;
+    container.states.gameStates.pause = false;
+    container.states.playerStates.tempVelocity = {};
+    container.states.playerStates.persistentVelocity = {};
+    container.objects.cameraVector = {0,0,1};
+    container.objects.cameraUpVector = {0,1,0};
+    container.objects.cameraRightVector = {1,0,0};
+    container.objects.playerHitbox.clear();
+    container.objects.snow.clear();
+    container.objects.platforms.clear();
+    container.objects.movingPlatforms.clear();
+    container.rotation.currentMouse = {};
+    container.rotation.previousMouse = {};
+    container.rotation.total_yzRotation = 0;
+    container.rotation.xzRotation = 0;
+    container.rotation.yzRotation = 0;
+}
+
 void Files::loadStage(Container& container, int stage) {
-    
+    resetData(container); // add player hitbox somewhere idk yet
+    createSnow(container);
+
+    if (stage == 1) {
+        container.objects.backgroundColor = stageMetaData[0].backgroundColor;
+        container.objects.cameraPosition = stageMetaData[0].camera;
+        loadFile(container,"placeholder");
+    } else if (stage == 2) {
+
+    } else if (stage == 3) {
+        
+    }
 }
