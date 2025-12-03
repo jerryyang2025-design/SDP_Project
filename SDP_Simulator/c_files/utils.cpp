@@ -5,6 +5,7 @@
 
 #define EPSILON 1e-6
 #define NEAR_PLANE 1.0f
+#define M_PI 3.141592653589793238462643383
 
 float clamp(float value, float min, float max) {
     if (value < min) {
