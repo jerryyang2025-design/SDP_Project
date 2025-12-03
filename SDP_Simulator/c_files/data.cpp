@@ -144,6 +144,7 @@ void Files::loadStage(Container& container, int stage) {
         container.objects.playerHitbox = stageMetaData[0].playerHitbox;
         // commented out to prevent accidentally starting with the placeholder file name
         // loadFile(container,"placeholder");
+        // probably make a vector of string file names and loop through instead of doing manual
     } else if (stage == 2) {
 
     } else if (stage == 3) {
