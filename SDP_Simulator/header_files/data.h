@@ -24,7 +24,7 @@ struct Object {
 struct Objects {
     std::array<std::array<float,3>,9> playerHitbox;
     std::vector<std::array<float,3>> snow;
-    std::array<float,3> lightSource = {-10000,10000,-10000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}; // play around with the light position
+    std::array<float,3> lightSource = {-10000,10000,-10000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}, universalUp = {0,1,0}; // play around with the light position
     std::array<int,3> backgroundColor;
     struct Object end, water; // default water height of 0
     std::vector<struct Object> platforms, movingPlatforms;
