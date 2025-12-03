@@ -10,6 +10,8 @@
 #define NUMBEROFFILES 1
 #define NUMBEROFSTAGES 3
 
+class Container;
+
 struct Object {
     std::vector<std::array<float,3>> vertices;
     std::vector<std::array<int,3>> faces, faceColors, hitbox;
