@@ -16,11 +16,11 @@ void playerInputs(Container& container) {
     }
     
     if (Keyboard.isPressed(KEY_S)) {
-        container.states.playerStates.tempVelocity[0] = userSpeed;
+        container.states.playerStates.tempVelocity[2] = -userSpeed;
     }
 
     if (Keyboard.isPressed(KEY_D)) {
-        container.states.playerStates.tempVelocity[2] = -userSpeed;
+        container.states.playerStates.tempVelocity[0] = userSpeed;
     }
 
     if (Keyboard.isPressed(KEY_SPACE)) {
