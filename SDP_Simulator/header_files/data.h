@@ -7,6 +7,7 @@
 #define SCREEN_X 320
 #define SCREEN_Y 240
 #define FPS 30
+#define PLAYER_HEIGHT 100
 #define NUMBEROFFILES 1
 #define NUMBEROFSTAGES 3
 
@@ -21,7 +22,8 @@ struct Object {
 };
 
 struct Objects {
-    std::vector<std::array<float,3>> playerHitbox, snow;
+    std::array<std::array<float,3>,9> playerHitbox;
+    std::vector<std::array<float,3>> snow;
     std::array<float,3> lightSource = {-10000,10000,-10000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}; // play around with the light position
     std::array<int,3> backgroundColor;
     struct Object end, water; // default water height of 0
@@ -57,6 +59,7 @@ struct PlayerStates {
 };
 
 struct GameStates {
+    bool cutscenePlayed = false;
     int frames = 0;
     bool pause = false;
 };
@@ -73,6 +76,7 @@ struct Rotation {
 
 struct Art {
     char menu[30] = "art/menu_art.png";
+    char cutscene[30] = "art/cutscene_art2.png";
 };
 
 struct FileData {
@@ -83,6 +87,7 @@ struct FileData {
 struct StageData {
     std::array<int,3> backgroundColor;
     std::array<float,3> camera;
+    std::array<std::array<float,3>,9> playerHitbox = {};
 };
 
 class Files {

@@ -17,7 +17,8 @@ Files::Files() { // edit the location and size of each object/stage
     fileMetaData[0].height = 1;
 
     stageMetaData[0].backgroundColor = {140, 170, 200};
-    stageMetaData[0].camera = {0, 100, 0};
+    stageMetaData[0].camera = {0, PLAYER_HEIGHT, 0};
+    stageMetaData[0].playerHitbox = generateHitbox(stageMetaData[0].camera,50);
 }
 
 void Files::loadFile(Container& container, const std::string& fileName) {
@@ -123,7 +124,6 @@ void resetData(Container& container) { // does not reset end or water, since tho
     container.objects.cameraVector = {0,0,1};
     container.objects.cameraUpVector = {0,1,0};
     container.objects.cameraRightVector = {1,0,0};
-    container.objects.playerHitbox.clear();
     container.objects.snow.clear();
     container.objects.platforms.clear();
     container.objects.movingPlatforms.clear();
@@ -135,13 +135,16 @@ void resetData(Container& container) { // does not reset end or water, since tho
 }
 
 void Files::loadStage(Container& container, int stage) {
-    resetData(container); // add player hitbox somewhere idk yet
+    resetData(container);
     createSnow(container);
 
     if (stage == 1) {
         container.objects.backgroundColor = stageMetaData[0].backgroundColor;
         container.objects.cameraPosition = stageMetaData[0].camera;
-        loadFile(container,"placeholder");
+        container.objects.playerHitbox = stageMetaData[0].playerHitbox;
+        // commented out to prevent accidentally starting with the placeholder file name
+        // loadFile(container,"placeholder");
+        // probably make a vector of string file names and loop through instead of doing manual
     } else if (stage == 2) {
 
     } else if (stage == 3) {
