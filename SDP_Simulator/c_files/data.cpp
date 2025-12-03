@@ -142,7 +142,8 @@ void Files::loadStage(Container& container, int stage) {
         container.objects.backgroundColor = stageMetaData[0].backgroundColor;
         container.objects.cameraPosition = stageMetaData[0].camera;
         container.objects.playerHitbox = stageMetaData[0].playerHitbox;
-        loadFile(container,"placeholder");
+        // commented out to prevent accidentally starting with the placeholder file name
+        // loadFile(container,"placeholder");
     } else if (stage == 2) {
 
     } else if (stage == 3) {

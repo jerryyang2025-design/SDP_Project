@@ -59,6 +59,7 @@ struct PlayerStates {
 };
 
 struct GameStates {
+    bool cutscenePlayed = false;
     int frames = 0;
     bool pause = false;
 };
@@ -75,6 +76,7 @@ struct Rotation {
 
 struct Art {
     char menu[30] = "art/menu_art.png";
+    char cutscene[30] = "art/cutscene_art2.png";
 };
 
 struct FileData {

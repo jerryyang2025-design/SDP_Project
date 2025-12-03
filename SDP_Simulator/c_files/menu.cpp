@@ -1,7 +1,9 @@
 #include "FEHLCD.h"
+#include "FEHUtility.h"
 #include "FEHImages.h"
 #include "header_files/menu.h"
 #include "header_files/data.h"
+#include "header_files/player_inputs.h"
 
 void drawMenu(Container& container) {
     FEHImage menu;
@@ -101,6 +103,8 @@ void stageSelect(Container& container) {
                 if (y >= 60 && y <= 105) {
                     container.files.loadStage(container,1);
                     runGame(container);
+                    // temporary test, might keep return, might not
+                    return;
                 }
                 /*
                 Add more options here
@@ -238,12 +242,57 @@ void credits(Container& container) {
     }
 }
 
+void playCutscene(Container& container) { // probably add music and sound effects throughout
+    LCD.SetBackgroundColor(BLACK);
+    LCD.Clear();
+    LCD.Update();
+    Sleep(1.0);
+
+    FEHImage cutscene1; // also maybe add text or something so it doesn't look like a random static image even though it is
+    cutscene1.Open(container.files.art.menu); // idk maybe we can make the text flash on the screen to add "movement"
+    cutscene1.Draw(0, 0);
+    cutscene1.Close();
+    LCD.Update();
+    Sleep(4.0);
+
+    LCD.SetBackgroundColor(BLACK);
+    LCD.Clear();
+    LCD.Update();
+    Sleep(1.0);
+
+    FEHImage cutscene2;
+    cutscene2.Open(container.files.art.cutscene);
+    cutscene2.Draw(0, 0);
+    cutscene2.Close();
+    LCD.Update();
+    Sleep(3.0);
+
+    LCD.SetBackgroundColor(BLACK);
+    LCD.Clear();
+    LCD.Update();
+    Sleep(1.0);
+}
+
 void runGame(Container& container) {
+    if (!container.states.gameStates.cutscenePlayed) {
+        playCutscene(container);
+        container.states.gameStates.cutscenePlayed = true;
+    }
     while (!container.states.gameStates.pause) {
         // environment effects
         // idk movement, collision?
         // check states?
         // render
+        // control frame rate if necessary
         // probably more I'm forgetting
+
+        // test, and to make sure you don't loop infinitely
+        printf("Game Running...\n");
+        Sleep(2.0);
+
+        // this is a temporary test to see if we can exit, it will be moved later
+        playerInputs(container);
     }
+    // temporary, will probably keep the return statement but add something before too (pause, win, lose screen)
+    return;
 }
