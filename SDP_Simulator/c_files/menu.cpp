@@ -1,6 +1,7 @@
 #include "FEHLCD.h"
 #include "FEHImages.h"
 #include "header_files/menu.h"
+#include "header_files/data.h"
 
 void drawMenu(Container& container) {
     FEHImage menu;
@@ -98,8 +99,8 @@ void stageSelect(Container& container) {
                     return;
                 }
                 if (y >= 60 && y <= 105) {
-                    // load stage
-                    // Run game or something
+                    container.files.loadStage(container,1);
+                    runGame(container);
                 }
                 /*
                 Add more options here
