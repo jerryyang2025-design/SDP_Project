@@ -48,11 +48,27 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                         slant = 1;
                     }
                     if (slant == 0) {
-
+                        if (angleOfPoly < 90) {
+                            while (penetrationDepth < 0 && penetrationDepth > CHECKED_DEPTH) {
+                                // move player and hitbox function, move up slightly
+                                for (int i = 0; i < 3; i++) {
+                                    toPointVector[i] = testVertex[i] - center[i];
+                                }
+                                penetrationDepth = magnitudeInDirection(normalVector,toPointVector);
+                            }
+                        } else {
+                            while (penetrationDepth < 0 && penetrationDepth > CHECKED_DEPTH) { // literally completely useless for this project, never going to happen, but might as well
+                                // move player and hitbox function, move down slightly
+                                for (int i = 0; i < 3; i++) {
+                                    toPointVector[i] = testVertex[i] - center[i];
+                                }
+                                penetrationDepth = magnitudeInDirection(normalVector,toPointVector);
+                            }
+                        }
                     } else if (slant == 1) {
-
+                        // move in normal direction
                     } else if (slant == 2) {
-                        
+                        // move sideways, use x z of normal vector
                     }
                     // move player back based on group
                     // adjust velocity based on group
