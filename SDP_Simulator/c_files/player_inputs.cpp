@@ -1,6 +1,7 @@
 #include "FEHKeyboard.h"
 #include "FEHLCD.h"
 #include "header_files/data.h"
+#include "utils.h"
 
 #define userSpeed 10.0
 #define jumpForce 60.0
@@ -41,8 +42,15 @@ void playerInputs(Container& container) {
         container.rotation.currentMouse[1] = y;
 
         container.rotation.xzRotation = sensitivity*(x - container.rotation.previousMouse[0]); // uses x displacement to get xz rotation
-        container.rotation.yzRotation = sensitivity*(y - container.rotation.previousMouse[1]); // uses y displacement to get yz rotation
+        container.rotation.yzRotation = -sensitivity*(y - container.rotation.previousMouse[1]); // uses y displacement to get yz rotation
         container.rotation.total_yzRotation += container.rotation.yzRotation;
     }
+
+}
+
+void cameraRotation(Container& container) {
+    std::array<float,3> cameraSpherical;
+    cameraSpherical = cartesianToSpherical(container.objects.cameraVector);
+    cameraSpherical[]
 
 }

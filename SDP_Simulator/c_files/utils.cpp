@@ -202,9 +202,19 @@ int manageFPS(int time) {
 std::array<float,3> sphericalToCartesian(float rho, float theta, float phi) {
     // theta is xz plane, phi is yz plane, use rho = 1
     std::array<float,3> xyz; // {x, y, z}
-    xyz[0] = rho * sin(theta*M_PI/180) * cos(phi*M_PI/180);
-    xyz[1] = rho * sin(phi*M_PI/180);
-    xyz[2] = rho * cos(theta*M_PI/180) * cos(phi*M_PI/180);
+    xyz[0] = rho * sin(phi*M_PI/180) * cos(theta*M_PI/180);
+    xyz[1] = rho * cos(phi*M_PI/180);
+    xyz[2] = rho * sin(phi*M_PI/180) * sin(theta*M_PI/180);
     return xyz;
+    // Needs testing
+}
+
+std::array<float,3> cartesianToSpherical(std::array<float,3> xyz) {
+    // converts an array of cartesian coords to spherical coords
+    std::array<float,3> rThetaPhi; // {r, theta, phi}
+    rThetaPhi[0] = sqrt(pow(xyz[0],2)+pow(xyz[1],2)+pow(xyz[2],2));
+    rThetaPhi[1] = atan2(xyz[2],xyz[0]);
+    rThetaPhi[2] = atan2(xyz[1],sqrt(pow(xyz[0],2)+pow(xyz[2],2)));
+    return rThetaPhi;
     // Needs testing
 }
