@@ -184,3 +184,13 @@ int manageFPS(int time) {
     int sleepTime = clamp(round(desiredTime - time),0,1000);
     return sleepTime;
 } // probably unnecessary, needs testing to be sure
+
+std::array<float,3> sphericalToCartesian(float rho, float theta, float phi) {
+    // theta is xz plane, phi is yz plane, use rho = 1
+    std::array<float,3> xyz; // {x, y, z}
+    xyz[0] = rho * sin(theta*M_PI/180) * cos(phi*M_PI/180);
+    xyz[1] = rho * sin(phi*M_PI/180);
+    xyz[2] = rho * cos(theta*M_PI/180) * cos(phi*M_PI/180);
+    return xyz;
+    // Needs testing
+}
