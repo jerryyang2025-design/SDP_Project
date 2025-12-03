@@ -6,6 +6,7 @@ void drawMenu(Container& container) {
     FEHImage menu;
     menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
+    menu.Close();
 
     LCD.SetFontColor(WHITE);
     LCD.SetFontScale(2);
@@ -49,6 +50,7 @@ void drawStage(Container& container) {
     FEHImage menu;
     menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
+    menu.Close();
 
     LCD.SetFontColor(GRAY);
     LCD.FillRectangle(50,10,220,45);
@@ -112,6 +114,7 @@ void drawStats(Container& container) {
     FEHImage menu;
     menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
+    menu.Close();
 
     LCD.SetFontColor(GRAY);
     LCD.FillRectangle(50,10,220,45);
@@ -153,6 +156,7 @@ void drawInstructions(Container& container) {
     FEHImage menu;
     menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
+    menu.Close();
 
     LCD.SetFontColor(GRAY);
     LCD.FillRectangle(50,10,220,45);
@@ -194,6 +198,7 @@ void drawCredits(Container& container) {
     FEHImage menu;
     menu.Open(container.files.art.menu);
     menu.Draw(0, 0);
+    menu.Close();
 
     LCD.SetFontColor(GRAY);
     LCD.FillRectangle(50,10,220,45);

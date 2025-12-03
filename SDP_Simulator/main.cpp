@@ -36,9 +36,8 @@ int main()
 
     // render(*container);
 
+    drawMenu(*container);
     while (1) {
-        drawMenu(*container);
-
         float x, y;
 
         if (LCD.Touch(&x, &y)) {
@@ -46,15 +45,19 @@ int main()
             if (x >= 195 && x <= 305) {
                 if (y >= 15 && y <= 60) {
                     stageSelect(*container);
+                    drawMenu(*container);
                 }
                 if (y >= 65 && y <= 110) {
                     statsPage(*container);
+                    drawMenu(*container);
                 }
                 if (y >= 115 && y <= 160) {
                     instructions(*container);
+                    drawMenu(*container);
                 }
                 if (y >= 165 && y <= 210) {
                     credits(*container);
+                    drawMenu(*container);
                 }
             }
         }
