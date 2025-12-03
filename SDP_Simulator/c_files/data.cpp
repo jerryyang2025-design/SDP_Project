@@ -13,12 +13,13 @@
 Files::Files() { // edit the location and size of each object/stage
     fileMetaData[0].center = {0, 0, 0};
     fileMetaData[0].size = 1;
+    fileMetaData[0].height = 1;
 
     stageMetaData[0].backgroundColor = {140, 170, 200};
     stageMetaData[0].camera = {0, 100, 0};
 }
 
-void Files::loadFile(Container& container, char fileName[30]) {
+void Files::loadFile(Container& container, const std::string& fileName) {
     std::ifstream file;
 
     file.open(fileName);
@@ -61,7 +62,7 @@ void Files::loadFile(Container& container, char fileName[30]) {
         if (testline[0] == "v") {
             std::array<float,3> vertex;
             vertex[0] = std::stof(testline[1]) * fileMetaData[fileID].size + fileMetaData[fileID].center[0];
-            vertex[1] = std::stof(testline[2]) * fileMetaData[fileID].size + fileMetaData[fileID].center[1];
+            vertex[1] = std::stof(testline[2]) * fileMetaData[fileID].height + fileMetaData[fileID].center[1];
             vertex[2] = std::stof(testline[3]) * fileMetaData[fileID].size + fileMetaData[fileID].center[2];
             if (type == 1) {
                 container.objects.platforms[index].vertices.push_back(vertex);

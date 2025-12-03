@@ -77,7 +77,7 @@ struct Art {
 
 struct FileData {
     std::array<float,3> center;
-    float size;
+    float size, height;
 };
 
 struct StageData {
@@ -93,7 +93,7 @@ class Files {
     public:
         struct Art art;
         // probably add one for music and sound effects too
-        void loadFile(Container& container, char fileName[30]);
+        void loadFile(Container& container, const std::string& fileName);
         void loadStage(Container& container, int stage);
         Files();
 };
