@@ -38,7 +38,7 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
         container.rotation.currentMouse[0] = x; // Sets current mouse position to what LCD.touch detected
         container.rotation.currentMouse[1] = y;
 
-        if (container.rotation.newMousePos = false) { // newMousePos makes sure camera only rotates when dragging
+        if (container.rotation.newMousePos == false) { // newMousePos makes sure camera only rotates when dragging
             container.rotation.xzRotation = sensitivity*(x - container.rotation.previousMouse[0]); // uses x displacement to get xz rotation
             container.rotation.yzRotation = -sensitivity*(y - container.rotation.previousMouse[1]); // uses y displacement to get yz rotation
         }
