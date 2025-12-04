@@ -4,10 +4,20 @@
 #define GRAVITATIONAL_CONSTANT 100
 #define COLLISION_TEST_BOUNDS 500
 #define CHECKED_DEPTH -10
-#define pi 3.141592653589793238462643383
+#define DRAG 0.9
+#define pi 3.141592653589793238462643383 // too lazy to include a library
 
 void applyGravity(Container& container, int time) { // time between frames in miliseconds
     container.states.playerStates.persistentVelocity[1] += -GRAVITATIONAL_CONSTANT * time / 1000.0f;
+}
+
+void applyDrag(Container& container) {
+    container.states.playerStates.persistentVelocity[0] *= DRAG;
+    container.states.playerStates.persistentVelocity[2] *= DRAG;
+}
+
+void collisionCorrection(Container& container) {
+    // uhh do stuff here
 }
 
 void polygonCollision(Container& container, const struct Object& object, int type, int polygon) {
@@ -16,16 +26,19 @@ void polygonCollision(Container& container, const struct Object& object, int typ
             std::array<float,3> testVertex = container.objects.playerHitbox[i];
 
             std::array<std::array<float,3>,3> hitbox = {object.vertices[object.hitbox[polygon][0]],object.vertices[object.hitbox[polygon][1]],object.vertices[object.hitbox[polygon][2]]};
-            std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector,normalVectorOne,normalVectorTwo,normalVectorThree,toPointVector;
+            std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector,normalVectorOne,normalVectorTwo,normalVectorThree,toPointVector,toPointVectorOne,toPointVectorTwo,toPointVectorThree;
 
-            for (int i = 0; i < 3; i++) { // maybe precompute and store polygon vectors if noticably slow
-                center[i] = (hitbox[0][i] + hitbox[1][i] + hitbox[2][i]) / 3;
-                vectorOne[i] = hitbox[1][i] - hitbox[0][i];
-                vectorTwo[i] = hitbox[2][i] - hitbox[0][i];
-                sideOne[i] = hitbox[1][i] - hitbox[0][i];
-                sideTwo[i] = hitbox[2][i] - hitbox[1][i];
-                sideThree[i] = hitbox[0][i] - hitbox[2][i];
-                toPointVector[i] = testVertex[i] - center[i];
+            for (int j = 0; j < 3; j++) { // maybe precompute and store polygon vectors if noticably slow
+                center[j] = (hitbox[0][j] + hitbox[1][j] + hitbox[2][j]) / 3;
+                vectorOne[j] = hitbox[1][j] - hitbox[0][j];
+                vectorTwo[j] = hitbox[2][j] - hitbox[0][j];
+                sideOne[j] = hitbox[1][j] - hitbox[0][j];
+                sideTwo[j] = hitbox[2][j] - hitbox[1][j];
+                sideThree[j] = hitbox[0][j] - hitbox[2][j];
+                toPointVector[j] = testVertex[j] - center[j];
+                toPointVectorOne[j] = testVertex[j] - hitbox[0][j];
+                toPointVectorTwo[j] = testVertex[j] - hitbox[1][j];
+                toPointVectorThree[j] = testVertex[j] - hitbox[2][j];
             }
 
             normalVector = crossProduct(vectorOne,vectorTwo);
@@ -36,7 +49,7 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                 normalVectorTwo = crossProduct(normalVector,sideTwo);
                 normalVectorThree = crossProduct(normalVector,sideThree);
 
-                if (magnitudeInDirection(normalVectorOne,toPointVector) > 0 && magnitudeInDirection(normalVectorTwo,toPointVector) > 0 && magnitudeInDirection(normalVectorThree,toPointVector) > 0) {
+                if (magnitudeInDirection(normalVectorOne,toPointVectorOne) > 0 && magnitudeInDirection(normalVectorTwo,toPointVectorTwo) > 0 && magnitudeInDirection(normalVectorThree,toPointVectorThree) > 0) {
                     container.states.playerStates.onGround = {1,type};
                     float angleOfPoly = angle(normalVector,container.objects.universalUp) * 180.0f / pi;
                     int slant;
@@ -48,23 +61,7 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                         slant = 1;
                     }
                     if (slant == 0) {
-                        if (angleOfPoly < 90) {
-                            while (penetrationDepth < 0 && penetrationDepth > CHECKED_DEPTH) {
-                                // move player and hitbox function, move up slightly
-                                for (int i = 0; i < 3; i++) {
-                                    toPointVector[i] = testVertex[i] - center[i];
-                                }
-                                penetrationDepth = magnitudeInDirection(normalVector,toPointVector);
-                            }
-                        } else {
-                            while (penetrationDepth < 0 && penetrationDepth > CHECKED_DEPTH) { // literally completely useless for this project, never going to happen, but might as well
-                                // move player and hitbox function, move down slightly
-                                for (int i = 0; i < 3; i++) {
-                                    toPointVector[i] = testVertex[i] - center[i];
-                                }
-                                penetrationDepth = magnitudeInDirection(normalVector,toPointVector);
-                            }
-                        }
+                        // move vertically
                     } else if (slant == 1) {
                         // move in normal direction
                     } else if (slant == 2) {
@@ -79,3 +76,4 @@ void polygonCollision(Container& container, const struct Object& object, int typ
 }
 
 // turn onGround off if collision not detected in a frame
+// central handle collision function to loop through all hitbox polygons
