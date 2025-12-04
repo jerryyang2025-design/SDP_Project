@@ -72,6 +72,7 @@ struct States {
 struct Rotation {
     std::array<float,2> previousMouse, currentMouse;
     float xzRotation=0, yzRotation=0, total_yzRotation=0;
+    bool newMousePos;
 };
 
 struct Art {
