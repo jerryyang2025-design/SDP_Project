@@ -1,31 +1,30 @@
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include "FEHKeyboard.h"
 #include "FEHLCD.h"
 #include "header_files/data.h"
 #include "header_files/utils.h"
 
-#define userSpeed 10.0
-#define jumpForce 60.0
-#define sensitivity 0.375
-#define yCameraLimit 85 // in degrees
+#define USERSPEED 10.0
+#define JUMPFORCE 60.0
+#define SENSITIVITY 0.375
+#define CAMERALIMIT 85 // in degrees
+#define PI 3.141592653589793238462643383
 
 void playerInputs(Container& container) { // Reads in inputs from keyboard and mouse
     if (Keyboard.isPressed(KEY_W)) {
-        container.states.playerStates.tempVelocity[2] = userSpeed;
+        container.states.playerStates.tempVelocity[2] = USERSPEED;
     }
     if (Keyboard.isPressed(KEY_A)) {
-        container.states.playerStates.tempVelocity[0] = -userSpeed;
+        container.states.playerStates.tempVelocity[0] = -USERSPEED;
     }
     if (Keyboard.isPressed(KEY_S)) {
-        container.states.playerStates.tempVelocity[2] = -userSpeed;
+        container.states.playerStates.tempVelocity[2] = -USERSPEED;
     }
     if (Keyboard.isPressed(KEY_D)) {
-        container.states.playerStates.tempVelocity[0] = userSpeed;
+        container.states.playerStates.tempVelocity[0] = USERSPEED;
     }
     if (Keyboard.isPressed(KEY_SPACE)) {
         if (true) {
-            container.states.playerStates.persistentVelocity[1] += jumpForce;
+            container.states.playerStates.persistentVelocity[1] += JUMPFORCE;
         }
     }
     if (Keyboard.isPressed(KEY_ESCAPE)) {
@@ -39,8 +38,8 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
         container.rotation.currentMouse[1] = y;
 
         if (container.rotation.newMousePos == false) { // newMousePos makes sure camera only rotates when dragging
-            container.rotation.xzRotation = sensitivity*(x - container.rotation.previousMouse[0]); // uses x displacement to get xz rotation
-            container.rotation.yzRotation = -sensitivity*(y - container.rotation.previousMouse[1]); // uses y displacement to get yz rotation
+            container.rotation.xzRotation = SENSITIVITY*(x - container.rotation.previousMouse[0]); // uses x displacement to get xz rotation
+            container.rotation.yzRotation = -SENSITIVITY*(y - container.rotation.previousMouse[1]); // uses y displacement to get yz rotation
         }
         container.rotation.newMousePos = false;
     }
@@ -60,11 +59,11 @@ void cameraRotation(Container& container) { // Rotates camera based on angle rot
     cameraSpherical[1] += -container.rotation.xzRotation;
     rightSpherical[1] += -container.rotation.xzRotation;
 
-    if ((cameraSpherical[2] + container.rotation.yzRotation) > yCameraLimit*M_PI/180) {
-        cameraSpherical[2] = yCameraLimit*M_PI/180; // Checks if angle will go above limit. If so, set to limit.
+    if ((cameraSpherical[2] + container.rotation.yzRotation) > CAMERALIMIT*PI/180) {
+        cameraSpherical[2] = CAMERALIMIT*PI/180; // Checks if angle will go above limit. If so, set to limit.
     }
-    else if ((cameraSpherical[2] + container.rotation.yzRotation) < -yCameraLimit*M_PI/180) {
-        cameraSpherical[2] = -yCameraLimit*M_PI/180;
+    else if ((cameraSpherical[2] + container.rotation.yzRotation) < -CAMERALIMIT*PI/180) {
+        cameraSpherical[2] = -CAMERALIMIT*PI/180;
     }
     else {
         cameraSpherical[2] += container.rotation.yzRotation;
