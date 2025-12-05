@@ -6,4 +6,6 @@
 
 void playerInputs(Container& container);
 
+void cameraRotation(Container& container);
+
 void handleInputEffects(Container& container);
