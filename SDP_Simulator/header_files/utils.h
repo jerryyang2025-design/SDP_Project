@@ -46,8 +46,14 @@ std::vector<std::string> split(const std::string& s, char delim);
 
 std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, float scale);
 
+int manageFPS(int time);
+
 std::array<float,3> sphericalToCartesian(float, float, float);
 
 std::array<float,3> cartesianToSpherical(std::array<float,3>);
 
 void normalize(std::array<float,3>& vector);
+
+void toCameraSpace(const Objects& objects, const std::array<float,3>& v, float& x, float& y, float& z);
+
+std::array<float,3> interpolateVertex(const std::array<float,3>& vInside, const std::array<float,3>& vOutside, const Objects& objects);

@@ -1,9 +1,14 @@
+#include <chrono>
 #include "FEHLCD.h"
 #include "FEHUtility.h"
 #include "FEHImages.h"
 #include "header_files/menu.h"
 #include "header_files/data.h"
 #include "header_files/player_inputs.h"
+#include "header_files/environment_effects.h"
+#include "header_files/physics.h"
+#include "header_files/renderer.h"
+#include "header_files/utils.h"
 
 void drawMenu(Container& container) {
     FEHImage menu;
@@ -103,8 +108,7 @@ void stageSelect(Container& container) {
                 if (y >= 60 && y <= 105) {
                     container.files.loadStage(container,1);
                     runGame(container);
-                    // temporary test, might keep return, might not
-                    return;
+                    drawStage(container);
                 }
                 /*
                 Add more options here
@@ -275,23 +279,26 @@ void playCutscene(Container& container) { // probably add music and sound effect
 
 void runGame(Container& container) {
     if (!container.states.gameStates.cutscenePlayed) {
-        playCutscene(container);
+        // playCutscene(container);
         container.states.gameStates.cutscenePlayed = true;
     }
     while (!container.states.gameStates.pause) {
-        // environment effects
-        // idk movement, collision?
-        // check states?
-        // render
-        // control frame rate if necessary
-        // probably more I'm forgetting
+        auto start = std::chrono::steady_clock::now();
 
-        // test, and to make sure you don't loop infinitely
-        printf("Game Running...\n");
-        Sleep(2.0);
-
-        // this is a temporary test to see if we can exit, it will be moved later
+        handleEnvironmentAnimations(container);
         playerInputs(container);
+        handlePhysics(container);
+        handleInputEffects(container);
+        // check game states
+        render(container);
+
+        auto end = std::chrono::steady_clock::now();
+        container.states.gameStates.timeBetweenFrames = static_cast<int>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+        );
+        manageFPS(container.states.gameStates.timeBetweenFrames);
+        container.states.gameStates.frames++;
+        // probably more I'm forgetting
     }
     // temporary, will probably keep the return statement but add something before too (pause, win, lose screen)
     return;

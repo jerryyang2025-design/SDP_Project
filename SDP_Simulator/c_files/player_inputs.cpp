@@ -2,14 +2,18 @@
 #include "FEHLCD.h"
 #include "header_files/data.h"
 #include "header_files/utils.h"
+#include "header_files/physics.h"
+#include "header_files/player_inputs.h"
 
-#define USERSPEED 5.0 // remember this is per frame, so adjust accordingly
+#define USERSPEED 10.0 // remember this is per frame, so adjust accordingly
 #define JUMPFORCE 60.0
-#define SENSITIVITY 0.375
-#define CAMERALIMIT 85 // in degrees
+#define SENSITIVITY 0.01
+#define CAMERALIMIT 90 // in degrees
 #define PI 3.141592653589793238462643383
 
 void playerInputs(Container& container) { // Reads in inputs from keyboard and mouse
+    container.states.playerStates.tempVelocity = {};
+    // needs to be changed to use camera vector instead of assuming z is forward
     if (Keyboard.isPressed(KEY_W)) {
         container.states.playerStates.tempVelocity[2] = USERSPEED;
     }
@@ -23,7 +27,7 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
         container.states.playerStates.tempVelocity[0] = USERSPEED;
     }
     if (Keyboard.isPressed(KEY_SPACE)) {
-        if (true) {
+        if (container.states.playerStates.onGround[0]) {
             container.states.playerStates.persistentVelocity[1] += JUMPFORCE;
         }
     }
@@ -72,5 +76,24 @@ void cameraRotation(Container& container) { // Rotates camera based on angle rot
     container.objects.cameraVector = sphericalToCartesian(cameraSpherical[0],cameraSpherical[1],cameraSpherical[2]);
     container.objects.cameraUpVector[1] = container.objects.cameraVector[1];
     container.objects.cameraRightVector = sphericalToCartesian(rightSpherical[0],rightSpherical[1],rightSpherical[2]);
+}
 
+void handleMovement(Container& container) {
+    container.states.playerStates.onGround = {};
+    std::array<float,3> velocity;
+    for (int i = 0; i < 3; i++) {
+        velocity[i] = container.states.playerStates.persistentVelocity[i] + container.states.playerStates.tempVelocity[i];
+    }
+    for (int i = 0; i < 3; i++) {
+        velocity[i] /= STEP_AMOUNT;
+    }
+    for (int i = 0; i < STEP_AMOUNT; i++) {
+        movePlayer(container,velocity);
+        handleCollision(container,i);
+    }
+}
+
+void handleInputEffects(Container& container) {
+    cameraRotation(container);
+    handleMovement(container);
 }

@@ -6,7 +6,7 @@
 
 #define BRIGHTNESS 120000000 // may adjust depending on light source distance
 #define SNOWCOLOR 30
-#define SNOWSIZE 5
+#define SNOWSIZE 1500
 #define NEAR_PLANE 1.0f
 
 /*
@@ -130,6 +130,114 @@ void handleLighting(struct Objects& objects) {
     }
 }
 
+void clipPolygon(Objects& objects, Object& object, int polygon) {
+    std::vector<std::array<float,3>> verts = {object.vertices[object.faces[polygon][0]], object.vertices[object.faces[polygon][1]], object.vertices[object.faces[polygon][2]]};
+
+    std::array<int,3> insideIndices;
+    std::array<int,3> outsideIndices;
+    int insideCount = 0, outsideCount = 0;
+
+    for (int i = 0; i < 3; i++) {
+        float x, y, z;
+        toCameraSpace(objects, verts[i], x, y, z);
+
+        float aspect = (float)SCREEN_X / (float)SCREEN_Y;
+
+        bool hidden = (z < NEAR_PLANE || x < -z * aspect || x > z * aspect || y < -z || y > z);
+
+        if (!hidden) {
+            insideIndices[insideCount++] = i;
+        } else {
+            outsideIndices[outsideCount++] = i;
+        }
+    }
+
+    if (insideCount == 0) {
+        return;
+    } else if (insideCount == 3) {
+        int baseIndex = object.tempVertices.size();
+        for (int i = 0; i < 3; i++) {
+            object.tempVertices.push_back(verts[i]);
+        }
+        object.tempFaces.push_back({baseIndex, baseIndex+1, baseIndex+2});
+        object.tempFaceColors.push_back(object.faceColors[polygon]);
+        return;
+    }
+
+    std::array<float,3> newV[2];
+
+    if (insideCount == 1) {
+        int i0 = insideIndices[0];
+        int o0 = outsideIndices[0];
+        int o1 = outsideIndices[1];
+
+        newV[0] = interpolateVertex(verts[i0], verts[o0], objects);
+        newV[1] = interpolateVertex(verts[i0], verts[o1], objects);
+
+        int baseIndex = object.tempVertices.size();
+        object.tempVertices.push_back(verts[i0]);
+        object.tempVertices.push_back(newV[0]);
+        object.tempVertices.push_back(newV[1]);
+        object.tempFaces.push_back({baseIndex, baseIndex+1, baseIndex+2});
+        object.tempFaceColors.push_back(object.faceColors[polygon]);
+
+    } else if (insideCount == 2) {
+        int i0 = insideIndices[0];
+        int i1 = insideIndices[1];
+        int o0 = outsideIndices[0];
+
+        newV[0] = interpolateVertex(verts[i0], verts[o0], objects);
+        newV[1] = interpolateVertex(verts[i1], verts[o0], objects);
+
+        int baseIndex = object.tempVertices.size();
+
+        object.tempVertices.push_back(verts[i0]);
+        object.tempVertices.push_back(verts[i1]);
+        object.tempVertices.push_back(newV[0]);
+        object.tempFaces.push_back({baseIndex, baseIndex+1, baseIndex+2});
+        object.tempFaceColors.push_back(object.faceColors[polygon]);
+
+        object.tempVertices.push_back(verts[i1]);
+        object.tempVertices.push_back(newV[1]);
+        object.tempVertices.push_back(newV[0]);
+        object.tempFaces.push_back({baseIndex+3, baseIndex+4, baseIndex+5});
+        object.tempFaceColors.push_back(object.faceColors[polygon]);
+    }
+}
+
+void clipAll(Container& container) {
+    for (int i = 0; i < container.objects.platforms.size(); i++) {
+        container.objects.platforms[i].tempVertices.clear();
+        container.objects.platforms[i].tempFaces.clear();
+        container.objects.platforms[i].tempFaceColors.clear();
+    }
+    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+        container.objects.movingPlatforms[i].tempVertices.clear();
+        container.objects.movingPlatforms[i].tempFaces.clear();
+        container.objects.movingPlatforms[i].tempFaceColors.clear();
+    }
+    container.objects.end.tempVertices.clear();
+    container.objects.end.tempFaces.clear();
+    container.objects.end.tempFaceColors.clear();
+
+    for (int i = 0; i < container.objects.platforms.size(); i++) {
+        for (int j = 0; j < container.objects.platforms[i].faces.size(); j++) {
+            clipPolygon(container.objects, container.objects.platforms[i], j);
+        }
+    }
+    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+        for (int j = 0; j < container.objects.movingPlatforms[i].faces.size(); j++) {
+            clipPolygon(container.objects, container.objects.movingPlatforms[i], j);
+        }
+    }
+    for (int j = 0; j < container.objects.end.faces.size(); j++) {
+        clipPolygon(container.objects, container.objects.end, j);
+    }
+    for (int j = 0; j < container.objects.water.faces.size(); j++) {
+        clipPolygon(container.objects, container.objects.water, j);
+    }
+}
+
 /*
 Function to project a single 3d vertex into 2d
 */
@@ -186,12 +294,12 @@ void projectAll(Container& container) {
     container.screen.faceColors.clear();
     for (int i = 0; i < container.objects.platforms.size(); i++) {
         int size = container.screen.vertices.size();
-        for (int j = 0; j < container.objects.platforms[i].vertices.size(); j++) {
-            project(container.objects,container.objects.platforms[i].vertices,container.screen,j);
+        for (int j = 0; j < container.objects.platforms[i].tempVertices.size(); j++) {
+            project(container.objects,container.objects.platforms[i].tempVertices,container.screen,j);
         }
-        for (int j = 0; j < container.objects.platforms[i].faces.size(); j++) {
-            if (container.screen.vertices[container.objects.platforms[i].faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.platforms[i].faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.platforms[i].faces[j][2] + size][3] < 0.5) {
-                std::array<int,3> face = container.objects.platforms[i].faces[j], faceColor = container.objects.platforms[i].faceColors[j];
+        for (int j = 0; j < container.objects.platforms[i].tempFaces.size(); j++) {
+            if (!(container.screen.vertices[container.objects.platforms[i].tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.platforms[i].tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.platforms[i].tempFaces[j][2] + size][3] > 0.5)) {
+                std::array<int,3> face = container.objects.platforms[i].tempFaces[j], faceColor = container.objects.platforms[i].tempFaceColors[j];
                 for (int k = 0; k < 3; k++) {
                     face[k] += size;
                 }
@@ -202,12 +310,12 @@ void projectAll(Container& container) {
     }
     for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
         int size = container.screen.vertices.size();
-        for (int j = 0; j < container.objects.movingPlatforms[i].vertices.size(); j++) {
-            project(container.objects,container.objects.movingPlatforms[i].vertices,container.screen,j);
+        for (int j = 0; j < container.objects.movingPlatforms[i].tempVertices.size(); j++) {
+            project(container.objects,container.objects.movingPlatforms[i].tempVertices,container.screen,j);
         }
-        for (int j = 0; j < container.objects.movingPlatforms[i].faces.size(); j++) {
-            if (container.screen.vertices[container.objects.movingPlatforms[i].faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].faces[j][2] + size][3] < 0.5) {
-                std::array<int,3> face = container.objects.movingPlatforms[i].faces[j], faceColor = container.objects.movingPlatforms[i].faceColors[j];
+        for (int j = 0; j < container.objects.movingPlatforms[i].tempFaces.size(); j++) {
+            if (!(container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][2] + size][3] > 0.5)) {
+                std::array<int,3> face = container.objects.movingPlatforms[i].tempFaces[j], faceColor = container.objects.movingPlatforms[i].tempFaceColors[j];
                 for (int k = 0; k < 3; k++) {
                     face[k] += size;
                 }
@@ -217,12 +325,12 @@ void projectAll(Container& container) {
         }
     }
     int size = container.screen.vertices.size();
-    for (int j = 0; j < container.objects.end.vertices.size(); j++) {
-        project(container.objects,container.objects.end.vertices,container.screen,j);
+    for (int j = 0; j < container.objects.end.tempVertices.size(); j++) {
+        project(container.objects,container.objects.end.tempVertices,container.screen,j);
     }
-    for (int j = 0; j < container.objects.end.faces.size(); j++) {
-        if (container.screen.vertices[container.objects.end.faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.end.faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.end.faces[j][2] + size][3] < 0.5) {
-            std::array<int,3> face = container.objects.end.faces[j], faceColor = container.objects.end.faceColors[j];
+    for (int j = 0; j < container.objects.end.tempFaces.size(); j++) {
+        if (!(container.screen.vertices[container.objects.end.tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + size][3] > 0.5)) {
+            std::array<int,3> face = container.objects.end.tempFaces[j], faceColor = container.objects.end.tempFaceColors[j];
             for (int k = 0; k < 3; k++) {
                 face[k] += size;
             }
@@ -231,12 +339,12 @@ void projectAll(Container& container) {
         }
     }
     size = container.screen.vertices.size();
-    for (int j = 0; j < container.objects.water.vertices.size(); j++) {
-        project(container.objects,container.objects.water.vertices,container.screen,j);
+    for (int j = 0; j < container.objects.water.tempVertices.size(); j++) {
+        project(container.objects,container.objects.water.tempVertices,container.screen,j);
     }
-    for (int j = 0; j < container.objects.water.faces.size(); j++) {
-        if (container.screen.vertices[container.objects.water.faces[j][0] + size][3] < 0.5 || container.screen.vertices[container.objects.water.faces[j][1] + size][3] < 0.5 || container.screen.vertices[container.objects.water.faces[j][2] + size][3] < 0.5) {
-            std::array<int,3> face = container.objects.water.faces[j], faceColor = container.objects.water.faceColors[j];
+    for (int j = 0; j < container.objects.water.tempFaces.size(); j++) {
+        if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + size][3] > 0.5)) {
+            std::array<int,3> face = container.objects.water.tempFaces[j], faceColor = container.objects.water.tempFaceColors[j];
             for (int k = 0; k < 3; k++) {
                 face[k] += size;
             }
@@ -396,6 +504,7 @@ Master rendering function, finally
 
 void render(Container& container) {
     handleLighting(container.objects);
+    clipAll(container);
     projectAll(container);
     colorAll(container);
     findLines(container);

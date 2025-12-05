@@ -1,10 +1,13 @@
+#include <cmath>
 #include "header_files/data.h"
 #include "header_files/utils.h"
+#include "header_files/player_inputs.h"
 
 #define GRAVITATIONAL_CONSTANT 100
 #define COLLISION_TEST_BOUNDS 500
-#define CHECKED_DEPTH -10
+#define CHECKED_DEPTH -30
 #define DRAG 0.9
+#define WATER_HEIGHT 0
 #define pi 3.141592653589793238462643383 // too lazy to include a library
 
 void applyGravity(Container& container, int time) { // time between frames in miliseconds
@@ -14,6 +17,11 @@ void applyGravity(Container& container, int time) { // time between frames in mi
 void applyDrag(Container& container) {
     container.states.playerStates.persistentVelocity[0] *= DRAG;
     container.states.playerStates.persistentVelocity[2] *= DRAG;
+}
+
+void handlePhysics(Container& container) {
+    applyDrag(container);
+    applyGravity(container,container.states.gameStates.timeBetweenFrames);
 }
 
 void movePlayer(Container& container, std::array<float,3> movement) {
@@ -27,29 +35,25 @@ void movePlayer(Container& container, std::array<float,3> movement) {
     }
 }
 
-void collisionCorrection(Container& container, float depth, int slant, std::array<float,3> normal) {
+void collisionCorrection(Container& container, float depth, int slant, std::array<float,3> normal, int step) {
     std::array<float,3> reverseNormal;
     for (int i = 0; i < 3; i++) {
         reverseNormal[i] = -normal[i];
     }
     if (slant == 0) {
-        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
-        normalize(normal);
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= magnitude;
-        }
-        float vertical = magnitudeInDirection(container.objects.universalUp,normal);
-        container.states.playerStates.persistentVelocity[1] += vertical;
+        container.states.playerStates.persistentVelocity[1]  = 0;
 
         normalize(normal);
         for (int i = 0; i < 3; i++) {
             normal[i] *= depth;
         }
-        vertical = magnitudeInDirection(container.objects.universalUp,normal);
+        float normalAngle = angle(normal,container.objects.universalUp);
+        depth = depth * sin(normalAngle); // test this
+        float vertical = magnitudeInDirection(container.objects.universalUp,normal) + depth;
         std::array<float,3> move = {0,vertical,0};
         movePlayer(container,move);
     } else if (slant == 1) {
-        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
         normalize(normal); // how did it take me until this long to add a normalize function instead of doing it manually or in other functions
         for (int i = 0; i < 3; i++) {
             normal[i] *= magnitude;
@@ -62,7 +66,7 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
         }
         movePlayer(container,normal);
     } else if (slant == 2) {
-        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
         normalize(normal);
         for (int i = 0; i < 3; i++) {
             normal[i] *= magnitude;
@@ -75,6 +79,7 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
         container.states.playerStates.persistentVelocity[0] += normal[0];
         container.states.playerStates.persistentVelocity[2] += normal[2];
 
+        normal[1] = 0;
         normalize(normal);
         for (int i = 0; i < 3; i++) {
             normal[i] *= depth;
@@ -86,7 +91,7 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
     }
 }
 
-void polygonCollision(Container& container, const struct Object& object, int type, int polygon) {
+void polygonCollision(Container& container, const struct Object& object, int type, int polygon, int step) {
     if (distance(object.center[0] - container.objects.cameraPosition[0],object.center[1] - container.objects.cameraPosition[1],object.center[2] - container.objects.cameraPosition[2]) < COLLISION_TEST_BOUNDS) {
         std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector;
         std::array<std::array<float,3>,3> hitbox = {object.vertices[object.hitbox[polygon][0]],object.vertices[object.hitbox[polygon][1]],object.vertices[object.hitbox[polygon][2]]};
@@ -127,31 +132,30 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                     } else {
                         slant = 1;
                     }
-                    collisionCorrection(container, penetrationDepth, slant, normalVector);
+                    collisionCorrection(container, fabs(penetrationDepth), slant, normalVector, step);
                 }
             }
         }
     }
 }
 
-void handleCollision(Container& container) {
+void handleCollision(Container& container, int step) {
     for (int i = 0; i < container.objects.platforms.size(); i++) {
         for (int j = 0; j < container.objects.platforms[i].hitbox.size(); j++) {
-            polygonCollision(container,container.objects.platforms[i],1,j);
+            polygonCollision(container,container.objects.platforms[i],1,j,step);
         }
     }
     for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
         for (int j = 0; j < container.objects.movingPlatforms[i].hitbox.size(); j++) {
-            polygonCollision(container,container.objects.movingPlatforms[i],2,j);
+            polygonCollision(container,container.objects.movingPlatforms[i],2,j,step);
         }
     }
     for (int j = 0; j < container.objects.end.hitbox.size(); j++) {
-        polygonCollision(container,container.objects.end,3,j);
+        polygonCollision(container,container.objects.end,3,j,step);
     }
-    for (int j = 0; j < container.objects.water.hitbox.size(); j++) {
-        polygonCollision(container,container.objects.water,4,j);
+    for (int j = 0; j < container.objects.playerHitbox.size(); j++) {
+        if (container.objects.playerHitbox[j][1] < WATER_HEIGHT) {
+            container.states.playerStates.onGround = {1,4};
+        }
     }
 }
-
-// turn onGround off if collision not detected in a frame (in move player function)
-// central handle collision function to loop through all hitbox polygons

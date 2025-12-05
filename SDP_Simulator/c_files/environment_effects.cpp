@@ -4,10 +4,9 @@
 #include "header_files/utils.h"
 
 #define WAVEHEIGHT 10
-#define SNOWSPEED 10
-#define SNOWHEIGHT 300.0f
-#define ENVIRONMENT_LENGTH 1000
-#define ENVIRONMENT_WIDTH 500
+#define SNOWSPEED 3
+#define SNOWHEIGHT 5000.0f
+#define ENVIRONMENT_WIDTH 10000
 
 float waveMovement(std::array<float,3> vertex, long frames) {
     float wave1 = sin(frames * 0.25 + vertex[0] + vertex[2]);
@@ -21,12 +20,12 @@ void handleWaves(Container& container) {
     }
 }
 
-void createSnow(Container& container) {
-    int amountOfSnow = clamp(Random.RandInt() / 200 + 150,150,300);
+void createSnow(Container& container) { // adjust accordingly
+    int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 1000,600,1000);
     for (int i = 0; i < amountOfSnow; i++) {
-        float height = clamp(Random.RandInt() / 100.0f + 200,200,500);
-        float x = clamp(Random.RandInt() / 30.0f - ENVIRONMENT_WIDTH / 2,-ENVIRONMENT_WIDTH / 2,ENVIRONMENT_WIDTH / 2);
-        float z = clamp(Random.RandInt() / 60.0f - ENVIRONMENT_LENGTH / 10,-ENVIRONMENT_LENGTH / 10,ENVIRONMENT_LENGTH);
+        float height = clamp((Random.RandInt() / 32767.0f) * SNOWHEIGHT + 200,200,5200);
+        float x = clamp((Random.RandInt() / 32767.0f) * ENVIRONMENT_WIDTH - ENVIRONMENT_WIDTH / 2,-ENVIRONMENT_WIDTH / 2,ENVIRONMENT_WIDTH / 2);
+        float z = clamp((Random.RandInt() / 32767.0f) * ENVIRONMENT_WIDTH - ENVIRONMENT_WIDTH / 2,-ENVIRONMENT_WIDTH / 2,ENVIRONMENT_WIDTH / 2);
         container.objects.snow.push_back({x,height,z});
     }
 }

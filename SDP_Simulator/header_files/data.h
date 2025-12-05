@@ -14,8 +14,8 @@
 class Container;
 
 struct Object {
-    std::vector<std::array<float,3>> vertices;
-    std::vector<std::array<int,3>> faces, faceColors, hitbox;
+    std::vector<std::array<float,3>> vertices, tempVertices;
+    std::vector<std::array<int,3>> faces, faceColors, hitbox, tempFaces, tempFaceColors;
     std::array<float,3> center, color;
     float reflectionValue;
     float refractionValue;
@@ -62,6 +62,8 @@ struct GameStates {
     bool cutscenePlayed = false;
     int frames = 0;
     bool pause = false;
+    bool hoverOnButton = false;
+    int timeBetweenFrames = 0; // in milliseconds
 };
 
 struct States {

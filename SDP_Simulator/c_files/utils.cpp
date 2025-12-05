@@ -57,7 +57,7 @@ float magnitudeInDirection(std::array<float,3> a,std::array<float,3> b) {
     float magnitude = distance(a[0],a[1],a[2]);
     float dot = dotProduct(a,b);
     if (fabs(magnitude) < EPSILON) {
-        return 0;
+        return dot;
     }
     return dot / (magnitude);
 }
@@ -102,10 +102,11 @@ std::array<float,2> fieldOfViewBoundSide(const struct Objects& objects, std::arr
     float z = results[0];
     float hidden = 0;
     float projectedX;
-    if (fabs(z) < NEAR_PLANE) {
-        projectedX = x * (SCREEN_X / 2);
+    if (z < NEAR_PLANE) {
+        projectedX = x * (SCREEN_Y / 2);
+        hidden = 1;
     } else {
-        projectedX = x * (SCREEN_X / 2) / z;
+        projectedX = x * (SCREEN_Y / 2) / z;
     }
     if (fabs(projectedX) > (SCREEN_X / 2)) {
         hidden = 1;
@@ -119,8 +120,9 @@ std::array<float,2> fieldOfViewBoundUp(const struct Objects& objects, std::array
     float z = results[0];
     float hidden = 0;
     float projectedY;
-    if (fabs(z) < NEAR_PLANE) {
+    if (z < NEAR_PLANE) {
         projectedY = y * (SCREEN_Y / 2);
+        hidden = 1;
     } else {
         projectedY = y * (SCREEN_Y / 2) / z;
     }
@@ -224,4 +226,65 @@ void normalize(std::array<float,3>& vector) {
     for (int i = 0; i < 3; i++) {
         vector[i] /= magnitude;
     } 
+}
+
+void toCameraSpace(const Objects& objects, const std::array<float,3>& v, float& x, float& y, float& z) {
+    x = depthSide(objects, v);
+    y = depthUp(objects, v);
+    z = depth(objects, v)[0];
+}
+
+std::array<float,3> interpolateVertex(const std::array<float,3>& vInside, const std::array<float,3>& vOutside, const Objects& objects) {
+    float xIn, yIn, zIn;
+    float xOut, yOut, zOut;
+
+    toCameraSpace(objects, vInside,  xIn,  yIn,  zIn);
+    toCameraSpace(objects, vOutside, xOut, yOut, zOut);
+
+    float t = 1.0f;
+
+    if (zIn >= NEAR_PLANE && zOut < NEAR_PLANE) {
+        float tZ = (NEAR_PLANE - zIn) / (zOut - zIn);
+        if (tZ < t) {
+            t = tZ;
+        }
+    }
+
+    float aspect = (float)SCREEN_X / (float)SCREEN_Y;
+
+    if (xIn >= -zIn * aspect && xOut < -zOut * aspect) {
+        float tX = (-aspect * zIn - xIn) / ((xOut - xIn) - aspect * (zOut - zIn));
+        if (tX < t) {
+            t = tX;
+        }
+    }
+
+    if (xIn <= zIn * aspect && xOut > zOut * aspect) {
+        float tX = (aspect * zIn - xIn) / ((xOut - xIn) - aspect * (zOut - zIn));
+        if (tX < t) {
+            t = tX;
+        }
+    }
+
+    if (yIn >= -zIn && yOut < -zOut) {
+        float tY = (-zIn - yIn) / ((yOut - yIn) - (zOut - zIn));
+        if (tY < t) {
+            t = tY;
+        }
+    }
+
+    if (yIn <= zIn && yOut > zOut) {
+        float tY = (zIn - yIn) / ((yOut - yIn) - (zOut - zIn));
+        if (tY < t) {
+            t = tY;
+        }
+    }
+
+    t = clamp(t, 0.0f, 1.0f);
+
+    std::array<float,3> result;
+    for (int i = 0; i < 3; i++) {
+        result[i] = vInside[i] + t * (vOutside[i] - vInside[i]);
+    }
+    return result;
 }
