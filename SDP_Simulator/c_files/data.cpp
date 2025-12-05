@@ -15,12 +15,12 @@
 Files::Files() { // edit the location and size of each object/stage
     fileMetaData[0].center = {0, 0, 0};
     fileMetaData[0].size = 300;
-    fileMetaData[0].height = 100;
+    fileMetaData[0].height = 50;
     fileMetaData[1].center = {0, 0, 0};
     fileMetaData[1].size = 5000;
     fileMetaData[1].height = 0;
 
-    stageMetaData[0].backgroundColor = {140, 170, 200};
+    stageMetaData[0].backgroundColor = {140, 170, 210};
     stageMetaData[0].camera = {0, PLAYER_HEIGHT + STARTING_HEIGHT, 0};
     stageMetaData[0].playerHitbox = generateHitbox(stageMetaData[0].camera,50);
 }
@@ -91,6 +91,7 @@ void Files::loadFile(Container& container, const std::string& fileName) {
                 container.objects.end.vertices.push_back(vertex);
             } else if (type == 4) {
                 container.objects.water.vertices.push_back(vertex);
+                printf("%f\n",vertex[0]);
             }
         }
         if (testline[0] == "f") {
