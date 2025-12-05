@@ -1,1 +1,7 @@
 Plan the overall project structure and list your parts here
+
+Nigel:
+display stagepoints in stats (points per stage)
+add music and sfx
+instructions and credits
+website

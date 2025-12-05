@@ -4,11 +4,12 @@
 #include "header_files/utils.h"
 #include "header_files/physics.h"
 #include "header_files/player_inputs.h"
+#include <math.h>
 
 #define USERSPEED 10.0 // remember this is per frame, so adjust accordingly
 #define JUMPFORCE 60.0
-#define SENSITIVITY 0.01
-#define CAMERALIMIT 90 // in degrees
+#define SENSITIVITY 0.2
+#define CAMERALIMIT 85 // in degrees
 #define PI 3.141592653589793238462643383
 
 void playerInputs(Container& container) { // Reads in inputs from keyboard and mouse
@@ -66,25 +67,43 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
 }
 
 void cameraRotation(Container& container) { // Rotates camera based on angle rotated
-    std::array<float,3> cameraSpherical, upSpherical, rightSpherical;
+    std::array<float,3> cameraSpherical,tempUpVector, upSpherical, rightSpherical;
+    float temp;
+    
     cameraSpherical = cartesianToSpherical(container.objects.cameraVector); // Converts cameraVector to spherical coords
     rightSpherical = cartesianToSpherical(container.objects.cameraRightVector);
+    upSpherical = cartesianToSpherical(container.objects.cameraUpVector);
+    /*tempUpVector = container.objects.cameraUpVector;
+    
+    toCameraSpace(container.objects,tempUpVector,x,y,z);
+    tempUpVector[0] = x;
+    tempUpVector[1] = y;
+    tempUpVector[2] = z;
+    
+    upSpherical = cartesianToSpherical(tempUpVector);
+    */
 
-    cameraSpherical[1] += -container.rotation.xzRotation;
-    rightSpherical[1] += -container.rotation.xzRotation;
+    cameraSpherical[1] += container.rotation.xzRotation*PI/180;
+    rightSpherical[1] += container.rotation.xzRotation*PI/180;
 
-    if ((cameraSpherical[2] + container.rotation.yzRotation) > CAMERALIMIT*PI/180) {
+    if ((cameraSpherical[2] + container.rotation.yzRotation*PI/180) > CAMERALIMIT*PI/180) {
         cameraSpherical[2] = CAMERALIMIT*PI/180; // Checks if angle will go above limit. If so, set to limit.
+        upSpherical[2] = (CAMERALIMIT+90)*PI/180;
     }
-    else if ((cameraSpherical[2] + container.rotation.yzRotation) < -CAMERALIMIT*PI/180) {
+    else if ((cameraSpherical[2] + container.rotation.yzRotation*PI/180) < -CAMERALIMIT*PI/180) {
         cameraSpherical[2] = -CAMERALIMIT*PI/180;
+        upSpherical[2] = -(CAMERALIMIT+90)*PI/180;
     }
     else {
-        cameraSpherical[2] += container.rotation.yzRotation;
+        cameraSpherical[2] += container.rotation.yzRotation*PI/180;
+        upSpherical[2] += container.rotation.yzRotation*PI/180;
     }
     
     container.objects.cameraVector = sphericalToCartesian(cameraSpherical[0],cameraSpherical[1],cameraSpherical[2]);
-    container.objects.cameraUpVector[1] = container.objects.cameraVector[1];
+    container.objects.cameraUpVector = sphericalToCartesian(upSpherical[0],upSpherical[1],upSpherical[2]);
+    temp = container.objects.cameraUpVector[0];
+    container.objects.cameraUpVector[0] = container.objects.cameraUpVector[2];
+    container.objects.cameraUpVector[2] = temp;
     container.objects.cameraRightVector = sphericalToCartesian(rightSpherical[0],rightSpherical[1],rightSpherical[2]);
 }
 
