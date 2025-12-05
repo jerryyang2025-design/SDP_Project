@@ -83,8 +83,8 @@ void cameraRotation(Container& container) { // Rotates camera based on angle rot
     upSpherical = cartesianToSpherical(tempUpVector);
     */
 
-    cameraSpherical[1] += container.rotation.xzRotation*PI/180;
-    rightSpherical[1] += container.rotation.xzRotation*PI/180;
+    cameraSpherical[1] += -container.rotation.xzRotation*PI/180;
+    rightSpherical[1] += -container.rotation.xzRotation*PI/180;
 
     if ((cameraSpherical[2] + container.rotation.yzRotation*PI/180) > CAMERALIMIT*PI/180) {
         cameraSpherical[2] = CAMERALIMIT*PI/180; // Checks if angle will go above limit. If so, set to limit.
