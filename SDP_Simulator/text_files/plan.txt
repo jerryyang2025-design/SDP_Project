@@ -5,3 +5,9 @@ display stagepoints in stats (points per stage)
 add music and sfx
 instructions and credits
 website
+
+Jerry:
+polygon clipping
+blender models and stage design
+camera rotation
+optimization
