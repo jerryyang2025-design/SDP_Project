@@ -16,32 +16,99 @@ void applyDrag(Container& container) {
     container.states.playerStates.persistentVelocity[2] *= DRAG;
 }
 
-void collisionCorrection(Container& container) {
-    // uhh do stuff here
+void movePlayer(Container& container, std::array<float,3> movement) {
+    for (int i = 0; i < 3; i++) {
+        container.objects.cameraPosition[i] += movement[i];
+    }
+    for (int i = 0; i < container.objects.playerHitbox.size(); i++) {
+        for (int j = 0; j < 3; j++) {
+            container.objects.playerHitbox[i][j] += movement[j];
+        }
+    }
+}
+
+void collisionCorrection(Container& container, float depth, int slant, std::array<float,3> normal) {
+    std::array<float,3> reverseNormal;
+    for (int i = 0; i < 3; i++) {
+        reverseNormal[i] = -normal[i];
+    }
+    if (slant == 0) {
+        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= magnitude;
+        }
+        float vertical = magnitudeInDirection(container.objects.universalUp,normal);
+        container.states.playerStates.persistentVelocity[1] += vertical;
+
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= depth;
+        }
+        vertical = magnitudeInDirection(container.objects.universalUp,normal);
+        std::array<float,3> move = {0,vertical,0};
+        movePlayer(container,move);
+    } else if (slant == 1) {
+        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        normalize(normal); // how did it take me until this long to add a normalize function instead of doing it manually or in other functions
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= magnitude;
+            container.states.playerStates.persistentVelocity[i] += normal[i];
+        }
+
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= depth;
+        }
+        movePlayer(container,normal);
+    } else if (slant == 2) {
+        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= magnitude;
+        }
+        magnitude = pythag(normal[0],normal[2]);
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= magnitude;
+        }
+        container.states.playerStates.persistentVelocity[0] += normal[0];
+        container.states.playerStates.persistentVelocity[2] += normal[2];
+
+        normalize(normal);
+        for (int i = 0; i < 3; i++) {
+            normal[i] *= depth;
+        }
+        magnitude = pythag(normal[0],normal[2]);
+        normalize(normal);
+        std::array<float,3> move = {normal[0] * magnitude,0,normal[2] * magnitude};
+        movePlayer(container,move);
+    }
 }
 
 void polygonCollision(Container& container, const struct Object& object, int type, int polygon) {
     if (distance(object.center[0] - container.objects.cameraPosition[0],object.center[1] - container.objects.cameraPosition[1],object.center[2] - container.objects.cameraPosition[2]) < COLLISION_TEST_BOUNDS) {
+        std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector;
+        std::array<std::array<float,3>,3> hitbox = {object.vertices[object.hitbox[polygon][0]],object.vertices[object.hitbox[polygon][1]],object.vertices[object.hitbox[polygon][2]]};
+        for (int j = 0; j < 3; j++) {
+            center[j] = (hitbox[0][j] + hitbox[1][j] + hitbox[2][j]) / 3;
+            vectorOne[j] = hitbox[1][j] - hitbox[0][j];
+            vectorTwo[j] = hitbox[2][j] - hitbox[0][j];
+            sideOne[j] = hitbox[1][j] - hitbox[0][j];
+            sideTwo[j] = hitbox[2][j] - hitbox[1][j];
+            sideThree[j] = hitbox[0][j] - hitbox[2][j];
+        }
+        normalVector = crossProduct(vectorOne,vectorTwo);
         for (int i = 0; i < container.objects.playerHitbox.size(); i++) {
             std::array<float,3> testVertex = container.objects.playerHitbox[i];
+            std::array<float,3> normalVectorOne,normalVectorTwo,normalVectorThree,toPointVector,toPointVectorOne,toPointVectorTwo,toPointVectorThree;
 
-            std::array<std::array<float,3>,3> hitbox = {object.vertices[object.hitbox[polygon][0]],object.vertices[object.hitbox[polygon][1]],object.vertices[object.hitbox[polygon][2]]};
-            std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector,normalVectorOne,normalVectorTwo,normalVectorThree,toPointVector,toPointVectorOne,toPointVectorTwo,toPointVectorThree;
-
-            for (int j = 0; j < 3; j++) { // maybe precompute and store polygon vectors if noticably slow
-                center[j] = (hitbox[0][j] + hitbox[1][j] + hitbox[2][j]) / 3;
-                vectorOne[j] = hitbox[1][j] - hitbox[0][j];
-                vectorTwo[j] = hitbox[2][j] - hitbox[0][j];
-                sideOne[j] = hitbox[1][j] - hitbox[0][j];
-                sideTwo[j] = hitbox[2][j] - hitbox[1][j];
-                sideThree[j] = hitbox[0][j] - hitbox[2][j];
+            for (int j = 0; j < 3; j++) {
                 toPointVector[j] = testVertex[j] - center[j];
                 toPointVectorOne[j] = testVertex[j] - hitbox[0][j];
                 toPointVectorTwo[j] = testVertex[j] - hitbox[1][j];
                 toPointVectorThree[j] = testVertex[j] - hitbox[2][j];
             }
-
-            normalVector = crossProduct(vectorOne,vectorTwo);
 
             float penetrationDepth = magnitudeInDirection(normalVector,toPointVector);
             if (penetrationDepth < 0 && penetrationDepth > CHECKED_DEPTH) {
@@ -60,15 +127,7 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                     } else {
                         slant = 1;
                     }
-                    if (slant == 0) {
-                        // move vertically
-                    } else if (slant == 1) {
-                        // move in normal direction
-                    } else if (slant == 2) {
-                        // move sideways, use x z of normal vector
-                    }
-                    // move player back based on group
-                    // adjust velocity based on group
+                    collisionCorrection(container, penetrationDepth, slant, normalVector);
                 }
             }
         }

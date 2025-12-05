@@ -3,7 +3,7 @@
 #include "header_files/data.h"
 #include "header_files/utils.h"
 
-#define USERSPEED 10.0
+#define USERSPEED 5.0 // remember this is per frame, so adjust accordingly
 #define JUMPFORCE 60.0
 #define SENSITIVITY 0.375
 #define CAMERALIMIT 85 // in degrees

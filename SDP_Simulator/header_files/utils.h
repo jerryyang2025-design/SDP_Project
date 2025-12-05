@@ -49,3 +49,5 @@ std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, flo
 std::array<float,3> sphericalToCartesian(float, float, float);
 
 std::array<float,3> cartesianToSpherical(std::array<float,3>);
+
+void normalize(std::array<float,3>& vector);

@@ -218,3 +218,10 @@ std::array<float,3> cartesianToSpherical(std::array<float,3> xyz) {
     return rThetaPhi;
     // may need more testing
 }
+
+void normalize(std::array<float,3>& vector) {
+    float magnitude = distance(vector[0],vector[1],vector[2]);
+    for (int i = 0; i < 3; i++) {
+        vector[i] /= magnitude;
+    } 
+}
