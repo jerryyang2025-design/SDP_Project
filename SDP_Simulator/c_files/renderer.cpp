@@ -13,11 +13,27 @@
 Function to calculate the brightness value of a single polygon
 */
 
-void polygonLightning(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
+void polygonLightning(struct Objects& objects, struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
     std::array<float,3> center,vectorOne,vectorTwo,normalVector,toLightVector,toCameraVector,halfVector;
     std::vector<std::array<float,3>> vertices = {object.vertices[object.faces[polygon][0]],
         object.vertices[object.faces[polygon][1]], 
         object.vertices[object.faces[polygon][2]]};
+
+    int polyHidden = 0;
+    for (int i = 0; i < 3; i++) {
+        float x, y, z;
+        toCameraSpace(objects, vertices[i], x, y, z);
+
+        float aspect = (float)SCREEN_X / (float)SCREEN_Y;
+
+        bool hidden = (z < NEAR_PLANE || x < -z * aspect || x > z * aspect || y < -z || y > z);
+        if (hidden) {
+            polyHidden += 1;
+        }
+    }
+    if (polyHidden == 3) {
+        return;
+    }
 
     for (int i = 0; i < 3; i++) { // maybe precompute and store polygon vectors if noticably slow
         center[i] = (vertices[0][i] + vertices[1][i] + vertices[2][i]) / 3;
@@ -110,22 +126,22 @@ Function to calculate the lighting/color of every polygon
 void handleLighting(struct Objects& objects) {
     for (int i = 0; i < objects.platforms.size(); i++) {
         for (int j = 0; j < objects.platforms[i].faces.size(); j++) {
-            polygonLightning(objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
+            polygonLightning(objects,objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
             polygonRefraction(objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
         }
     }
     for (int i = 0; i < objects.movingPlatforms.size(); i++) {
         for (int j = 0; j < objects.movingPlatforms[i].faces.size(); j++) {
-            polygonLightning(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+            polygonLightning(objects,objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
             polygonRefraction(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
         }
     }
     for (int j = 0; j < objects.end.faces.size(); j++) {
-        polygonLightning(objects.end,j,objects.lightSource,objects.cameraPosition);
+        polygonLightning(objects,objects.end,j,objects.lightSource,objects.cameraPosition);
         polygonRefraction(objects.end,j,objects.lightSource,objects.cameraPosition);
     }
     for (int j = 0; j < objects.water.faces.size(); j++) {
-        polygonLightning(objects.water,j,objects.lightSource,objects.cameraPosition);
+        polygonLightning(objects,objects.water,j,objects.lightSource,objects.cameraPosition);
         polygonRefraction(objects.water,j,objects.lightSource,objects.cameraPosition);
     }
 }

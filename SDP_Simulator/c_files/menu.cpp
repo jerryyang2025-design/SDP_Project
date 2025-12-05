@@ -107,12 +107,21 @@ void stageSelect(Container& container) {
                 }
                 if (y >= 60 && y <= 105) {
                     container.files.loadStage(container,1);
+                    container.states.currentStage = 1;
+                    runGame(container);
+                    drawStage(container);
+                } else if (y >= 110 && y <= 155) {
+                    container.files.loadStage(container,2);
+                    container.states.currentStage = 2;
                     runGame(container);
                     drawStage(container);
                 }
-                /*
-                Add more options here
-                */
+                 else if (y >= 160 && y <= 205) {
+                    container.files.loadStage(container,3);
+                    container.states.currentStage = 3;
+                    runGame(container);
+                    drawStage(container);
+                }
             }
         }
 
@@ -256,6 +265,10 @@ void playCutscene(Container& container) { // probably add music and sound effect
     cutscene1.Open(container.files.art.menu); // idk maybe we can make the text flash on the screen to add "movement"
     cutscene1.Draw(0, 0);
     cutscene1.Close();
+
+    LCD.SetFontColor(BLACK);
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("What a lovely day...",40,160);
     LCD.Update();
     Sleep(4.0);
 
@@ -268,8 +281,13 @@ void playCutscene(Container& container) { // probably add music and sound effect
     cutscene2.Open(container.files.art.cutscene);
     cutscene2.Draw(0, 0);
     cutscene2.Close();
+
+    LCD.SetFontColor(BLACK);
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("Oh no! The ice is melting!",40,160);
+    LCD.WriteAt("I need to get out of here.",40,190);
     LCD.Update();
-    Sleep(3.0);
+    Sleep(5.0);
 
     LCD.SetBackgroundColor(BLACK);
     LCD.Clear();
@@ -277,9 +295,51 @@ void playCutscene(Container& container) { // probably add music and sound effect
     Sleep(1.0);
 }
 
+void drawWin(Container& container) {
+    LCD.SetBackgroundColor(WHITE);
+    LCD.Clear();
+
+    LCD.SetFontColor(MIDNIGHTBLUE);
+    LCD.SetFontScale(1.5);
+    LCD.WriteAt("Stage Beat!",60,30);
+
+    FEHImage star;
+    star.Open(container.files.art.star);
+    star.Draw(72, 70);
+    star.Close();
+
+    LCD.Update();
+}
+
+void drawLose() {
+    LCD.SetBackgroundColor(WHITE);
+    LCD.Clear();
+
+    LCD.SetFontColor(MAROON);
+    LCD.SetFontScale(1.5);
+    LCD.WriteAt("Stage Lost!",60,30);
+
+    LCD.Update();
+}
+
+void checkGameState(Container& container) {
+    if (container.states.playerStates.onGround[0]) {
+        if (container.states.playerStates.onGround[1] == 3) {
+            drawWin(container);
+            container.states.stagePoints[container.states.currentStage] = 3;
+            container.states.gameStates.pause = true;
+            Sleep(4.0);
+        } else if (container.states.playerStates.onGround[1] == 4) {
+            drawLose();
+            Sleep(4.0);
+            container.files.loadStage(container,container.states.currentStage);
+        }
+    }
+}
+
 void runGame(Container& container) {
     if (!container.states.gameStates.cutscenePlayed) {
-        // playCutscene(container);
+        playCutscene(container);
         container.states.gameStates.cutscenePlayed = true;
     }
     while (!container.states.gameStates.pause) {
@@ -289,18 +349,14 @@ void runGame(Container& container) {
         playerInputs(container);
         handlePhysics(container);
         handleInputEffects(container);
-        // check game states
         render(container);
+        checkGameState(container);
 
         auto end = std::chrono::steady_clock::now();
-        container.states.gameStates.timeBetweenFrames = static_cast<int>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-        );
+        container.states.gameStates.timeBetweenFrames = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         manageFPS(container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
-        printf("%f,%f,%f\n",container.objects.cameraPosition[0],container.objects.cameraPosition[1],container.objects.cameraPosition[2]);
-        // probably more I'm forgetting
+        // printf("%f,%f,%f\n",container.objects.cameraPosition[0],container.objects.cameraPosition[1],container.objects.cameraPosition[2]);
     }
-    // temporary, will probably keep the return statement but add something before too (pause, win, lose screen)
     return;
 }

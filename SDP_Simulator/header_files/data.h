@@ -8,7 +8,7 @@
 #define SCREEN_Y 240
 #define FPS 30
 #define PLAYER_HEIGHT 100
-#define NUMBEROFFILES 1
+#define NUMBEROFFILES 3
 #define NUMBEROFSTAGES 3
 
 class Container;
@@ -69,6 +69,8 @@ struct GameStates {
 struct States {
     struct PlayerStates playerStates;
     struct GameStates gameStates;
+    std::array<int,3> stagePoints = {};
+    int currentStage = 0;
 };
 
 struct Rotation {
@@ -80,6 +82,7 @@ struct Rotation {
 struct Art {
     char menu[30] = "art/menu_art.png";
     char cutscene[30] = "art/cutscene_art2.png";
+    char star[30] = "art/Star.png";
 };
 
 struct FileData {
@@ -97,8 +100,8 @@ class Files {
     private:
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
         std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
-        std::vector<std::string> stageOne = {"obj_files/1_floe_0_0.obj",
-                                        "obj_files/1_water_0_1.obj"};
+        std::vector<std::string> stageOne = {"obj_files/1_water_0_2.obj",
+            "obj_files/1_floe_0_1.obj"};
     public:
         struct Art art;
         // probably add one for music and sound effects too
