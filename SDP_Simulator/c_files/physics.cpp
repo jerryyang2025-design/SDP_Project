@@ -134,5 +134,24 @@ void polygonCollision(Container& container, const struct Object& object, int typ
     }
 }
 
-// turn onGround off if collision not detected in a frame
+void handleCollision(Container& container) {
+    for (int i = 0; i < container.objects.platforms.size(); i++) {
+        for (int j = 0; j < container.objects.platforms[i].hitbox.size(); j++) {
+            polygonCollision(container,container.objects.platforms[i],1,j);
+        }
+    }
+    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+        for (int j = 0; j < container.objects.movingPlatforms[i].hitbox.size(); j++) {
+            polygonCollision(container,container.objects.movingPlatforms[i],2,j);
+        }
+    }
+    for (int j = 0; j < container.objects.end.hitbox.size(); j++) {
+        polygonCollision(container,container.objects.end,3,j);
+    }
+    for (int j = 0; j < container.objects.water.hitbox.size(); j++) {
+        polygonCollision(container,container.objects.water,4,j);
+    }
+}
+
+// turn onGround off if collision not detected in a frame (in move player function)
 // central handle collision function to loop through all hitbox polygons
