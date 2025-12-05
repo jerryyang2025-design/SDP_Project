@@ -53,7 +53,12 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
         std::array<float,3> move = {0,vertical,0};
         movePlayer(container,move);
     } else if (slant == 1) {
-        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+        float magnitude;
+        if ((STEP_AMOUNT - step) > 0) {
+            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+        } else {
+            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        }
         normalize(normal); // how did it take me until this long to add a normalize function instead of doing it manually or in other functions
         for (int i = 0; i < 3; i++) {
             normal[i] *= magnitude;
@@ -66,7 +71,12 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
         }
         movePlayer(container,normal);
     } else if (slant == 2) {
-        float magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+        float magnitude;
+        if ((STEP_AMOUNT - step) > 0) {
+            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+        } else {
+            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+        }
         normalize(normal);
         for (int i = 0; i < 3; i++) {
             normal[i] *= magnitude;

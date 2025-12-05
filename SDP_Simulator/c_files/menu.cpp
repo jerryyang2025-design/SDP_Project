@@ -298,6 +298,7 @@ void runGame(Container& container) {
         );
         manageFPS(container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
+        printf("%f,%f,%f\n",container.objects.cameraPosition[0],container.objects.cameraPosition[1],container.objects.cameraPosition[2]);
         // probably more I'm forgetting
     }
     // temporary, will probably keep the return statement but add something before too (pause, win, lose screen)
