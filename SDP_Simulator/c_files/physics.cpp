@@ -11,7 +11,7 @@
 #define pi 3.141592653589793238462643383 // too lazy to include a library
 
 void applyGravity(Container& container, int time) { // time between frames in miliseconds
-    container.states.playerStates.persistentVelocity[1] += -GRAVITATIONAL_CONSTANT * time / 1000.0f;
+    container.states.playerStates.persistentVelocity[1] += -GRAVITATIONAL_CONSTANT * clamp(time,0,100) / 1000.0f;
 }
 
 void applyDrag(Container& container) {

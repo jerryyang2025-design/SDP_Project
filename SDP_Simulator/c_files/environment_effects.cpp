@@ -3,8 +3,8 @@
 #include "header_files/data.h"
 #include "header_files/utils.h"
 
-#define WAVEHEIGHT 10
-#define SNOWSPEED 3
+#define WAVEHEIGHT 25
+#define SNOWSPEED 7
 #define SNOWHEIGHT 5000.0f
 #define ENVIRONMENT_WIDTH 10000
 
@@ -21,7 +21,7 @@ void handleWaves(Container& container) {
 }
 
 void createSnow(Container& container) { // adjust accordingly
-    int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 1000,600,1000);
+    int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 600,300,600);
     for (int i = 0; i < amountOfSnow; i++) {
         float height = clamp((Random.RandInt() / 32767.0f) * SNOWHEIGHT + 200,200,5200);
         float x = clamp((Random.RandInt() / 32767.0f) * ENVIRONMENT_WIDTH - ENVIRONMENT_WIDTH / 2,-ENVIRONMENT_WIDTH / 2,ENVIRONMENT_WIDTH / 2);
@@ -45,11 +45,9 @@ void handleSnow(Container& container) {
 }
 
 void handleEnvironmentAnimations(Container& container) {
-    handleWaves(container);
+    // handleWaves(container);
     handleSnow(container);
 }
 
 // add platform moving function, don't forget to move hitbox too
 // have a temporary velocity for the platforms, add it to player temp velocity if collision detected
-
-// put everything in a handleEnvironment function
