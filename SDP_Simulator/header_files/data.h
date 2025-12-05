@@ -97,7 +97,8 @@ class Files {
     private:
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
         std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
-        // have stage object files here
+        std::vector<std::string> stageOne = {"obj_files/1_floe_0_0.obj",
+                                        "obj_files/1_water_0_1.obj"};
     public:
         struct Art art;
         // probably add one for music and sound effects too

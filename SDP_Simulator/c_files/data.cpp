@@ -10,15 +10,18 @@
 #define WATERREFLECTION 0.5
 #define ICEREFRACTION 15
 #define WATERREFRACTION 5
+#define STARTING_HEIGHT 500
 
 Files::Files() { // edit the location and size of each object/stage
     fileMetaData[0].center = {0, 0, 0};
-    fileMetaData[0].size = 1;
-    fileMetaData[0].height = 1;
+    fileMetaData[0].size = 300;
+    fileMetaData[0].height = 100;
+    fileMetaData[1].center = {0, 0, 0};
+    fileMetaData[1].size = 5000;
+    fileMetaData[1].height = 0;
 
     stageMetaData[0].backgroundColor = {140, 170, 200};
-    // testing, default y should be PLAYER_HEIGHT
-    stageMetaData[0].camera = {0, 200, 0};
+    stageMetaData[0].camera = {0, PLAYER_HEIGHT + STARTING_HEIGHT, 0};
     stageMetaData[0].playerHitbox = generateHitbox(stageMetaData[0].camera,50);
 }
 
@@ -27,7 +30,8 @@ void Files::loadFile(Container& container, const std::string& fileName) {
 
     file.open(fileName);
 
-    std::vector<std::string> objectType = split(fileName,'_');
+    std::vector<std::string> objectType = split(fileName,'/');
+    objectType = split(objectType[1],'_');
     int type = 0, index, fileID;
 
     index = std::stoi(objectType[2]);
@@ -141,52 +145,52 @@ void Files::loadStage(Container& container, int stage) {
     createSnow(container);
 
     // test
-    Object* object = new Object();
-    object->center = {0, 100, 200};
-    object->color = {230, 230, 240};
-    object->reflectionValue = 0.5;
-    object->refractionValue = 15;
+    // Object* object = new Object();
+    // object->center = {0, 100, 200};
+    // object->color = {230, 230, 240};
+    // object->reflectionValue = 0.5;
+    // object->refractionValue = 15;
     
-    object->vertices.push_back({100, 200, 400}); // 0: top-right
-    object->vertices.push_back({100, 0, 400}); // 1: bottom-right
-    object->vertices.push_back({-100, 200, 400}); // 2: top-left
-    object->vertices.push_back({-100, 0, 200}); // 3: bottom-left
-    object->vertices.push_back({0, 1000, 1500}); // 4: up/back
-    object->vertices.push_back({100, 800, 800}); // 5: top-right-back
-    object->vertices.push_back({5000, 0, 5000});
-    object->vertices.push_back({-5000, 0, -5000});
-    object->vertices.push_back({5000, 0, -5000});
-    object->vertices.push_back({-5000, 0, 5000});
+    // object->vertices.push_back({100, 200, 400}); // 0: top-right
+    // object->vertices.push_back({100, 0, 400}); // 1: bottom-right
+    // object->vertices.push_back({-100, 200, 400}); // 2: top-left
+    // object->vertices.push_back({-100, 0, 200}); // 3: bottom-left
+    // object->vertices.push_back({0, 1000, 1500}); // 4: up/back
+    // object->vertices.push_back({100, 800, 800}); // 5: top-right-back
+    // object->vertices.push_back({5000, 0, 5000});
+    // object->vertices.push_back({-5000, 0, -5000});
+    // object->vertices.push_back({5000, 0, -5000});
+    // object->vertices.push_back({-5000, 0, 5000});
     
-    object->faces.push_back({0, 1, 2}); // top-right triangle
-    object->faceColors.push_back({230, 230, 240});
-    object->faces.push_back({2, 1, 3}); // bottom-left triangle
-    object->faceColors.push_back({230, 230, 240});
-    object->faces.push_back({2, 4, 0}); // edge case test
-    object->faceColors.push_back({230, 230, 240});
-    object->faces.push_back({2, 5, 1}); // z buffer test
-    object->faceColors.push_back({230, 230, 240});
-    object->faces.push_back({6, 8, 7}); // floor
-    object->faceColors.push_back({200, 220, 240});
-    object->faces.push_back({6, 7, 9}); // floor
-    object->faceColors.push_back({200, 220, 240});
+    // object->faces.push_back({0, 1, 2}); // top-right triangle
+    // object->faceColors.push_back({230, 230, 240});
+    // object->faces.push_back({2, 1, 3}); // bottom-left triangle
+    // object->faceColors.push_back({230, 230, 240});
+    // object->faces.push_back({2, 4, 0}); // edge case test
+    // object->faceColors.push_back({230, 230, 240});
+    // object->faces.push_back({2, 5, 1}); // z buffer test
+    // object->faceColors.push_back({230, 230, 240});
+    // object->faces.push_back({6, 8, 7}); // floor
+    // object->faceColors.push_back({200, 220, 240});
+    // object->faces.push_back({6, 7, 9}); // floor
+    // object->faceColors.push_back({200, 220, 240});
     
-    object->hitbox.push_back({0, 1, 2}); // top-right triangle
-    object->hitbox.push_back({2, 1, 3}); // bottom-left triangle
-    object->hitbox.push_back({2, 4, 0}); // edge case test
-    object->hitbox.push_back({2, 5, 1}); // z buffer test
-    object->hitbox.push_back({6, 8, 7}); // floor
-    object->hitbox.push_back({6, 7, 9}); // floor
+    // object->hitbox.push_back({0, 1, 2}); // top-right triangle
+    // object->hitbox.push_back({2, 1, 3}); // bottom-left triangle
+    // object->hitbox.push_back({2, 4, 0}); // edge case test
+    // object->hitbox.push_back({2, 5, 1}); // z buffer test
+    // object->hitbox.push_back({6, 8, 7}); // floor
+    // object->hitbox.push_back({6, 7, 9}); // floor
 
-    container.objects.platforms.push_back(*object);
+    // container.objects.platforms.push_back(*object);
 
     if (stage == 1) {
         container.objects.backgroundColor = stageMetaData[0].backgroundColor;
         container.objects.cameraPosition = stageMetaData[0].camera;
         container.objects.playerHitbox = stageMetaData[0].playerHitbox;
-        // commented out to prevent accidentally starting with the placeholder file name
-        // loadFile(container,"placeholder");
-        // probably make a vector of string file names and loop through instead of doing manual
+        for (int i = 0; i < stageOne.size(); i++) {
+            loadFile(container,stageOne[i]);
+        }
     } else if (stage == 2) {
 
     } else if (stage == 3) {
