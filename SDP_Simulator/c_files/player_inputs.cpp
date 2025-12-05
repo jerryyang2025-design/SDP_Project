@@ -14,17 +14,27 @@
 void playerInputs(Container& container) { // Reads in inputs from keyboard and mouse
     container.states.playerStates.tempVelocity = {};
     // needs to be changed to use camera vector instead of assuming z is forward
+
+    std::array<float,3> tempCamera=container.objects.cameraVector,tempRightCamera=container.objects.cameraRightVector;
+    normalize(tempCamera);
+    normalize(tempRightCamera);
+
     if (Keyboard.isPressed(KEY_W)) {
-        container.states.playerStates.tempVelocity[2] = USERSPEED;
+        //container.states.playerStates.tempVelocity[2] = USERSPEED;
+        container.states.playerStates.tempVelocity[2] = USERSPEED*tempCamera[2];
+        container.states.playerStates.tempVelocity[0] = USERSPEED*tempCamera[0];
     }
     if (Keyboard.isPressed(KEY_A)) {
-        container.states.playerStates.tempVelocity[0] = -USERSPEED;
+        container.states.playerStates.tempVelocity[0] = -USERSPEED*tempRightCamera[0];
+        container.states.playerStates.tempVelocity[2] = -USERSPEED*tempRightCamera[2];
     }
     if (Keyboard.isPressed(KEY_S)) {
-        container.states.playerStates.tempVelocity[2] = -USERSPEED;
+        container.states.playerStates.tempVelocity[2] = -USERSPEED*tempCamera[2];
+        container.states.playerStates.tempVelocity[0] = -USERSPEED*tempCamera[0];
     }
     if (Keyboard.isPressed(KEY_D)) {
-        container.states.playerStates.tempVelocity[0] = USERSPEED;
+        container.states.playerStates.tempVelocity[0] = USERSPEED*tempRightCamera[0];
+        container.states.playerStates.tempVelocity[2] = USERSPEED*tempRightCamera[2];
     }
     if (Keyboard.isPressed(KEY_SPACE)) {
         if (container.states.playerStates.onGround[0]) {
