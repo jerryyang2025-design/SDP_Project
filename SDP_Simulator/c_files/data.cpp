@@ -5,10 +5,10 @@
 #include "header_files/environment_effects.h"
 
 #define ICECOLOR {230, 230, 240}
-#define WATERCOLOR {230, 230, 240}
+#define WATERCOLOR {190, 215, 240}
 #define ICEREFLECTION 1
 #define WATERREFLECTION 0.5
-#define ICEREFRACTION 15
+#define ICEREFRACTION 20
 #define WATERREFRACTION 5
 #define STARTING_HEIGHT 500
 
@@ -141,7 +141,7 @@ void resetData(Container& container) { // does not reset end or water, since tho
 
 void Files::loadStage(Container& container, int stage) {
     resetData(container);
-    createSnow(container);
+    // createSnow(container);
 
     if (stage == 1) {
         container.objects.backgroundColor = stageMetaData[0].backgroundColor;

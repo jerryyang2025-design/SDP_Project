@@ -6,7 +6,7 @@
 #define GRAVITATIONAL_CONSTANT 100
 #define COLLISION_TEST_BOUNDS 500
 #define CHECKED_DEPTH -30
-#define DRAG 0.9
+#define DRAG 0.95
 #define WATER_HEIGHT 0
 #define pi 3.141592653589793238462643383 // too lazy to include a library
 
@@ -52,24 +52,24 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
         float vertical = magnitudeInDirection(container.objects.universalUp,normal) + depth;
         std::array<float,3> move = {0,vertical,0};
         movePlayer(container,move);
-    } else if (slant == 1) {
-        float magnitude;
-        if ((STEP_AMOUNT - step) > 0) {
-            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
-        } else {
-            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
-        }
-        normalize(normal); // how did it take me until this long to add a normalize function instead of doing it manually or in other functions
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= magnitude;
-            container.states.playerStates.persistentVelocity[i] += normal[i];
-        }
+    // } else if (slant == 1) {
+    //     float magnitude;
+    //     if ((STEP_AMOUNT - step) > 0) {
+    //         magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+    //     } else {
+    //         magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+    //     }
+    //     normalize(normal); // how did it take me until this long to add a normalize function instead of doing it manually or in other functions
+    //     for (int i = 0; i < 3; i++) {
+    //         normal[i] *= magnitude;
+    //         container.states.playerStates.persistentVelocity[i] += normal[i];
+    //     }
 
-        normalize(normal);
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= depth;
-        }
-        movePlayer(container,normal);
+    //     normalize(normal);
+    //     for (int i = 0; i < 3; i++) {
+    //         normal[i] *= depth;
+    //     }
+    //     movePlayer(container,normal);
     } else if (slant == 2) {
         float magnitude;
         if ((STEP_AMOUNT - step) > 0) {
@@ -155,11 +155,11 @@ void handleCollision(Container& container, int step) {
             polygonCollision(container,container.objects.platforms[i],1,j,step);
         }
     }
-    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
-        for (int j = 0; j < container.objects.movingPlatforms[i].hitbox.size(); j++) {
-            polygonCollision(container,container.objects.movingPlatforms[i],2,j,step);
-        }
-    }
+    // for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+    //     for (int j = 0; j < container.objects.movingPlatforms[i].hitbox.size(); j++) {
+    //         polygonCollision(container,container.objects.movingPlatforms[i],2,j,step);
+    //     }
+    // }
     for (int j = 0; j < container.objects.end.hitbox.size(); j++) {
         polygonCollision(container,container.objects.end,3,j,step);
     }

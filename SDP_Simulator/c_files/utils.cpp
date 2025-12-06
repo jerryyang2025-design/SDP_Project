@@ -200,25 +200,21 @@ int manageFPS(int time) {
     return sleepTime;
 } // probably unnecessary, needs testing to be sure
 
-std::array<float,3> sphericalToCartesian(float rho, float theta, float phi) {
-    // theta is xz plane, phi is yz plane, use rho = 1
-    // angles in radians, and assumes coord system is right-handed
+std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi) {
     std::array<float,3> xyz; // {x, y, z}
-    xyz[0] = rho * cos(phi) * cos(theta);
-    xyz[1] = rho * sin(phi);
-    xyz[2] = rho * cos(phi) * sin(theta);
+    xyz[0] = rThetaPhi[0] * cos(rThetaPhi[2]) * sin(rThetaPhi[1]);
+    xyz[1] = rThetaPhi[0] * sin(rThetaPhi[2]);
+    xyz[2] = rThetaPhi[0] * cos(rThetaPhi[2]) * cos(rThetaPhi[1]);
     return xyz;
-    // may need more testing
 }
 
-std::array<float,3> cartesianToSpherical(std::array<float,3> xyz) {
-    // converts an array of cartesian coords to spherical coords in radians. Correctly assumes y is up
+std::array<float,3> cartesianToSpherical(const std::array<float,3>& xyz) {
+    // converts an array of cartesian coords to spherical coords in radians.
     std::array<float,3> rThetaPhi; // {r, theta, phi}
-    rThetaPhi[0] = sqrt(pow(xyz[0],2)+pow(xyz[1],2)+pow(xyz[2],2));
-    rThetaPhi[1] = atan2(xyz[2],xyz[0]);
-    rThetaPhi[2] = atan2(xyz[1],sqrt(pow(xyz[0],2)+pow(xyz[2],2)));
+    rThetaPhi[0] = distance(xyz[0],xyz[1],xyz[2]);
+    rThetaPhi[1] = atan2(xyz[0],xyz[2]);
+    rThetaPhi[2] = atan2(xyz[1],pythag(xyz[0],xyz[2]));
     return rThetaPhi;
-    // may need more testing
 }
 
 void normalize(std::array<float,3>& vector) {

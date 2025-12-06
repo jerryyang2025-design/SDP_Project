@@ -48,9 +48,9 @@ std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, flo
 
 int manageFPS(int time);
 
-std::array<float,3> sphericalToCartesian(float, float, float);
+std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi);
 
-std::array<float,3> cartesianToSpherical(std::array<float,3>);
+std::array<float,3> cartesianToSpherical(const std::array<float,3>& xyz);
 
 void normalize(std::array<float,3>& vector);
 

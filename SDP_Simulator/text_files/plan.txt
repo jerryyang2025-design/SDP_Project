@@ -9,5 +9,4 @@ website
 Jerry:
 polygon clipping
 blender models and stage design
-camera rotation
 optimization

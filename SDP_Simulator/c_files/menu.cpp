@@ -339,7 +339,7 @@ void checkGameState(Container& container) {
 
 void runGame(Container& container) {
     if (!container.states.gameStates.cutscenePlayed) {
-        playCutscene(container);
+        // playCutscene(container);
         container.states.gameStates.cutscenePlayed = true;
     }
     while (!container.states.gameStates.pause) {
@@ -356,7 +356,6 @@ void runGame(Container& container) {
         container.states.gameStates.timeBetweenFrames = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         manageFPS(container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
-        // printf("%f,%f,%f\n",container.objects.cameraPosition[0],container.objects.cameraPosition[1],container.objects.cameraPosition[2]);
     }
     return;
 }
