@@ -5,6 +5,8 @@
 
 int main()
 {
+    freopen("/dev/null","w",stdout);
+
     Container* container = new Container();
     FEHSound music((*container).files.soundFiles.menuMusic); // make sure you know the index of each sound file
     (*container).files.music.push_back(music);

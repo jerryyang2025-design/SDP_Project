@@ -119,11 +119,8 @@ void transition(Container& container, int screen) {
 void circleTransition() {
     for (int i = 0; i <= 170; i = i + 2) {
         LCD.SetFontColor(BLACK);
-        if (pow(i,1.5) / 10.0f <= SCREEN_Y / 2) {
+        if (pow(i,1.5) / 10.0f <= pythag(SCREEN_X,SCREEN_Y)) {
             LCD.FillCircle(SCREEN_X / 2,SCREEN_Y / 2,pow(i,1.5) / 10.0f);
-        } else {
-            LCD.SetBackgroundColor(BLACK);
-            LCD.Clear();
         }
         LCD.Update();
     }
@@ -441,11 +438,11 @@ void drawStats(Container& container) {
     LCD.SetFontScale(1.5);
     LCD.WriteAt("Points",105,70);
     LCD.WriteAt("Stage 1:",60,100);
-    LCD.WriteAt(container.states.stagePoints[1],220,100);
+    LCD.WriteAt(container.states.stagePoints[0],220,100);
     LCD.WriteAt("Stage 2:",60,130);
-    LCD.WriteAt(container.states.stagePoints[2],220,130);
+    LCD.WriteAt(container.states.stagePoints[1],220,130);
     LCD.WriteAt("Stage 3:",60,160);
-    LCD.WriteAt(container.states.stagePoints[3],220,160);
+    LCD.WriteAt(container.states.stagePoints[2],220,160);
 
 }
 
