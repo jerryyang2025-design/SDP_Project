@@ -2,18 +2,32 @@
 #include "FEHImages.h"
 #include "FEHSound.h"
 #include "header_files/menu.h"
+#include "header_files/sounds.h"
 
 int main()
 {
     freopen("/dev/null","w",stdout);
 
     Container* container = new Container();
-    FEHSound music((*container).files.soundFiles.menuMusic); // make sure you know the index of each sound file
-    (*container).files.music.push_back(music);
+    FEHSound menuMusic((*container).files.soundFiles.menuMusic); // make sure you know the index of each sound file
+    (*container).files.music.push_back(menuMusic);
+    FEHSound cutsceneMusic((*container).files.soundFiles.cutsceneMusic);
+    (*container).files.music.push_back(cutsceneMusic);
+    FEHSound gameMusic((*container).files.soundFiles.gameMusic);
+    (*container).files.music.push_back(gameMusic);
+    FEHSound iceMelting((*container).files.soundFiles.iceMelting);
+    (*container).files.sfx.push_back(iceMelting);
+    FEHSound win((*container).files.soundFiles.win);
+    (*container).files.sfx.push_back(win);
+    FEHSound lose((*container).files.soundFiles.lose);
+    (*container).files.sfx.push_back(lose);
 
+    setVolumes(*container);
     drawMenu(*container);
     while (1) {
         float x, y;
+
+        playMenuMusic(*container);
 
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y)); // makes sure it doesn't spam between menu and other screens

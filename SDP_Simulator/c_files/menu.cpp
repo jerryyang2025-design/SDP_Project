@@ -381,6 +381,8 @@ void stageSelect(Container& container) {
     while (1) {
         float x, y;
 
+        playMenuMusic(container);
+
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
@@ -452,6 +454,8 @@ void statsPage(Container& container) {
     while (1) {
         float x, y;
 
+        playMenuMusic(container);
+
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
@@ -495,6 +499,8 @@ void instructions(Container& container) {
 
     while (1) {
         float x, y;
+
+        playMenuMusic(container);
 
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y));
@@ -540,6 +546,8 @@ void credits(Container& container) {
     while (1) {
         float x, y;
 
+        playMenuMusic(container);
+
         if (LCD.Touch(&x, &y)) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
@@ -565,6 +573,7 @@ void playCutscene(Container& container) { // probably add music and sound effect
     LCD.SetFontScale(0.5);
     LCD.WriteAt("What a lovely day...",40,160);
     LCD.Update();
+    playCutsceneMusic(container);
     Sleep(4.0);
 
     LCD.SetBackgroundColor(BLACK);
@@ -582,12 +591,15 @@ void playCutscene(Container& container) { // probably add music and sound effect
     LCD.WriteAt("Oh no! The ice is melting!",40,160);
     LCD.WriteAt("I need to get out of here.",40,190);
     LCD.Update();
+    container.files.sfx[0].play();
     Sleep(5.0);
 }
 
 void drawWin(Container& container) {
     LCD.SetBackgroundColor(WHITE);
     LCD.Clear();
+    
+    container.files.sfx[1].play();
 
     LCD.SetFontColor(MIDNIGHTBLUE);
     LCD.SetFontScale(1.5);
@@ -596,9 +608,12 @@ void drawWin(Container& container) {
     LCD.Update();
 }
 
-void drawLose() {
+void drawLose(Container& container) {
     LCD.SetBackgroundColor(BLACK);
     LCD.Clear();
+
+    container.files.sfx[2].play();
+
     for (float i = 0; i <= 1; i = i + 0.05) {
         LCD.SetBackgroundColor(LCD.ScaleColor(GRAY,i / 4.0f));
         LCD.Clear();
@@ -630,7 +645,7 @@ void drawLose() {
 }
 
 void loseScreen(Container& container) {
-    drawLose();
+    drawLose(container);
 
     float x, y;
     while (true) {
@@ -657,6 +672,7 @@ void loseScreen(Container& container) {
 void checkGameState(Container& container) {
     if (container.states.playerStates.onGround[0]) {
         if (container.states.playerStates.onGround[1] == 3) {
+            stopGameMusic(container);
             transition(container, 7);
             drawWin(container);
             float x = container.states.gameStates.frames;
@@ -665,6 +681,7 @@ void checkGameState(Container& container) {
             Sleep(5.0);
             transition(container, 2);
         } else if (container.states.playerStates.onGround[1] == 4) {
+            stopGameMusic(container);
             circleTransition();
             loseScreen(container);
         }
@@ -681,6 +698,7 @@ void runGame(Container& container) {
     while (!container.states.gameStates.pause) {
         auto start = std::chrono::steady_clock::now();
 
+        playGameMusic(container);
         handleEnvironmentAnimations(container);
         playerInputs(container);
         handlePhysics(container);
@@ -693,5 +711,6 @@ void runGame(Container& container) {
         manageFPS(container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
     }
+    stopGameMusic(container);
     return;
 }
