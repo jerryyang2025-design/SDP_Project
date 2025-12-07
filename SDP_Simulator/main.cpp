@@ -20,6 +20,7 @@ int main()
     FEHSound lose((*container).files.soundFiles.lose);
     (*container).files.sfx.push_back(lose);
 
+    setVolumes(*container);
     drawMenu(*container);
     while (1) {
         float x, y;

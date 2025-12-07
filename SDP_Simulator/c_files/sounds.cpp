@@ -5,6 +5,15 @@
 
 void pauseMusic(Container& container);
 
+void setVolumes(Container& container) {
+    container.files.music[0].setVolume(0.25); // menu music
+    container.files.music[1].setVolume(1.0); // cutscene wind
+    container.files.music[2].setVolume(0.2); // game music
+    container.files.sfx[0].setVolume(0.9); // ice breaking
+    container.files.sfx[1].setVolume(1.0); // win sfx
+    container.files.sfx[2].setVolume(0.8); // lose sfx
+}
+
 void playMenuMusic(Container& container) {
     if (container.states.musicStates.musicPlaying != 0) {
         container.files.music[0].restart();

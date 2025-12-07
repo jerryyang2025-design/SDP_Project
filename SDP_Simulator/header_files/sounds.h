@@ -2,6 +2,8 @@
 
 #include "data.h"
 
+void setVolumes(Container& container);
+
 void playMenuMusic(Container& container);
 
 void playCutsceneMusic(Container& container);

@@ -714,5 +714,6 @@ void runGame(Container& container) {
         manageFPS(container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
     }
+    stopGameMusic(container);
     return;
 }

@@ -68,7 +68,7 @@ struct GameStates {
 };
 
 struct MusicStates {
-    int musicPlaying = -1;
+    int musicPlaying = -1; // matches the index of music
     float startTime;
 };
 
@@ -107,7 +107,7 @@ struct SoundFiles {
     char menuMusic[30] = "sounds/menu.wav"; // music[0]
     char cutsceneMusic[30] = "sounds/cutscene.wav"; // music[1]
     char iceMelting[30] = "sounds/ice_melt.wav"; // sfx[0]
-    char gameMusic[30] = "sounds/game.wav"; // music[2]
+    char gameMusic[30] = "sounds/game.wav"; // music[2], polargeist from geometry dash cause why not
     char win[30] = "sounds/win.wav"; // sfx[1]
     char lose[30] = "sounds/lose.wav"; // sfx[2]
 };
