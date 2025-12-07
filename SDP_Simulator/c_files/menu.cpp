@@ -544,8 +544,17 @@ void drawCredits(Container& container) {
     LCD.SetFontColor(DARKGRAY);
     LCD.FillRectangle(55,65,210,135);
     LCD.SetFontColor(ROYALBLUE);
-    LCD.SetFontScale(1.5);
-    LCD.WriteAt("Credits",100,70);
+    LCD.SetFontScale(1);
+    LCD.WriteAt("Credits",118,70);
+
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("Game developed by Jerry Yang",62,95);
+    LCD.WriteAt("and Nigel Woodall",62,105);
+    LCD.WriteAt("Menu art by Jerry Yang",62,125);
+    LCD.WriteAt("Menu music: Winter Solace by",62,145);
+    LCD.WriteAt("D-Chain, www.newgrounds.com",62,155);
+    LCD.WriteAt("Game Music: Polargeist by Step,",62,175);
+    LCD.WriteAt("www.newgrounds.com",62,185);
 }
 
 void credits(Container& container) {
