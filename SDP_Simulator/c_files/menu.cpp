@@ -492,6 +492,14 @@ void drawInstructions(Container& container) {
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1);
     LCD.WriteAt("Instructions",90,70);
+
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("Use WASD to move",62,90);
+    LCD.WriteAt("Press spacebar to jump",62,110);
+    LCD.WriteAt("Click and drag to rotate camera",62,130);
+    LCD.WriteAt("Press esc to pause",62,150);
+    LCD.WriteAt("Jump to avoid water and reach the",62,170);
+    LCD.WriteAt("end to win!",62,180);
 }
 
 void instructions(Container& container) {

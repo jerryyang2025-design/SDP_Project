@@ -1,8 +1,7 @@
 Plan the overall project structure and list your parts here
 
 Nigel:
-add music and sfx
-instructions and credits
+credits
 website
 
 Jerry:
