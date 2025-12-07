@@ -96,6 +96,10 @@ struct StageData {
     std::array<std::array<float,3>,9> playerHitbox = {};
 };
 
+struct SoundFiles {
+    char menuMusic[30] = "sounds/menu_Winter-Solace.wav";
+};
+
 class Files {
     private:
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
@@ -104,6 +108,7 @@ class Files {
             "obj_files/1_floe_0_1.obj"};
     public:
         struct Art art;
+        struct SoundFiles soundFiles;
         // probably add one for music and sound effects too
         void loadFile(Container& container, const std::string& fileName);
         void loadStage(Container& container, int stage);

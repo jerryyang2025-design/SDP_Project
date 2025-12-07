@@ -10,6 +10,7 @@
 #include "header_files/physics.h"
 #include "header_files/renderer.h"
 #include "header_files/utils.h"
+#include "header_files/sounds.h"
 
 void drawMenu(Container& container);
 void drawStage(Container& container);
@@ -335,6 +336,8 @@ void drawMenu(Container& container) {
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1);
     LCD.WriteAt("Credits",208,178);
+    
+    playMusic(container);
 }
 
 void drawStage(Container& container) {
@@ -437,7 +440,14 @@ void drawStats(Container& container) {
     LCD.FillRectangle(55,65,210,135);
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1.5);
-    LCD.WriteAt("Stats",115,70);
+    LCD.WriteAt("Points",105,70);
+    LCD.WriteAt("Stage 1:",60,100);
+    LCD.WriteAt(container.states.stagePoints[1],220,100);
+    LCD.WriteAt("Stage 2:",60,130);
+    LCD.WriteAt(container.states.stagePoints[2],220,130);
+    LCD.WriteAt("Stage 3:",60,160);
+    LCD.WriteAt(container.states.stagePoints[3],220,160);
+
 }
 
 void statsPage(Container& container) {
