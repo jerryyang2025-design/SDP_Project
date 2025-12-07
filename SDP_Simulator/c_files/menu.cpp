@@ -27,6 +27,7 @@ void transition(Container& container, int screen) {
     //     LCD.Update();
     //     Sleep(0.005);
     // }
+    container.files.sfx[3].playFrom(0.4);
     for (int i = 0; i <= SCREEN_Y; i = i + 6) { // this is so much better than the black screen
         FEHImage transition;
         transition.Open(container.files.art.transition);
@@ -116,7 +117,8 @@ void transition(Container& container, int screen) {
     }
 }
 
-void circleTransition() {
+void circleTransition(Container& container) {
+    container.files.sfx[3].playFrom(0.4);
     for (int i = 0; i <= 170; i = i + 2) {
         LCD.SetFontColor(BLACK);
         if (pow(i,1.5) / 10.0f <= pythag(SCREEN_X,SCREEN_Y)) {
@@ -128,6 +130,7 @@ void circleTransition() {
 }
 
 void buttonFlash(Container& container, int button) {
+    container.files.sfx[4].play();
     if (button == 1) { // menu 1
         for (int i = 0; i < 6; i++) {
             LCD.SetFontColor(GRAY);
@@ -437,14 +440,14 @@ void drawStats(Container& container) {
     LCD.SetFontColor(DARKGRAY);
     LCD.FillRectangle(55,65,210,135);
     LCD.SetFontColor(ROYALBLUE);
-    LCD.SetFontScale(1.5);
+    LCD.SetFontScale(1);
     LCD.WriteAt("Points",105,70);
     LCD.WriteAt("Stage 1:",60,100);
-    LCD.WriteAt(container.states.stagePoints[0],220,100);
+    LCD.WriteAt(container.states.stagePoints[0],170,100);
     LCD.WriteAt("Stage 2:",60,130);
-    LCD.WriteAt(container.states.stagePoints[1],220,130);
+    LCD.WriteAt(container.states.stagePoints[1],170,130);
     LCD.WriteAt("Stage 3:",60,160);
-    LCD.WriteAt(container.states.stagePoints[2],220,160);
+    LCD.WriteAt(container.states.stagePoints[2],170,160);
 
 }
 
@@ -613,16 +616,20 @@ void playCutscene(Container& container) { // probably add music and sound effect
 }
 
 void drawWin(Container& container) {
-    LCD.SetBackgroundColor(WHITE);
-    LCD.Clear();
-    
-    container.files.sfx[1].play();
+    FEHImage win;
+    win.Open(container.files.art.win);
+    win.Draw(0, 0);
+    win.Close();
 
     LCD.SetFontColor(MIDNIGHTBLUE);
     LCD.SetFontScale(1.5);
-    LCD.WriteAt("Stage Beat!",60,30);
-
-    LCD.Update();
+    LCD.WriteAt("Stage Beat!",60,10);
+    LCD.SetFontScale(1);
+    LCD.WriteAt("Score:",127,55);
+    LCD.SetFontScale(1);
+    LCD.WriteAt(container.states.stagePoints[container.states.currentStage - 1],135,85);
+    LCD.SetFontScale(1);
+    LCD.WriteAt("Returning to Menu",60,200);
 }
 
 void drawLose(Container& container) {
@@ -677,7 +684,7 @@ void loseScreen(Container& container) {
                 }
                 if (x >= 185 && x <= 295) {
                     buttonFlash(container, 10);
-                    circleTransition();
+                    circleTransition(container);
                     container.files.loadStage(container,container.states.currentStage);
                     return;
                 }
@@ -691,15 +698,17 @@ void checkGameState(Container& container) {
         if (container.states.playerStates.onGround[1] == 3) {
             stopGameMusic(container);
             transition(container, 7);
-            drawWin(container);
+            container.files.sfx[1].play();
             float x = container.states.gameStates.frames;
-            container.states.stagePoints[container.states.currentStage] = clamp(-(x + 1000) / 2 + 6000 + 10000000000 / (2222 * (x + 1000)),10000,1000);
+            container.states.stagePoints[container.states.currentStage - 1] = clamp(-(x + 1000) / 2 + 6000 + 10000000000 / (2222 * (x + 1000)),1000,10000);
+            drawWin(container);
+            LCD.Update();
             container.states.gameStates.pause = true;
             Sleep(5.0);
             transition(container, 2);
         } else if (container.states.playerStates.onGround[1] == 4) {
             stopGameMusic(container);
-            circleTransition();
+            circleTransition(container);
             loseScreen(container);
         }
     }
@@ -711,7 +720,7 @@ void runGame(Container& container) {
         playCutscene(container);
         container.states.gameStates.cutscenePlayed = true;
     }
-    circleTransition();
+    circleTransition(container);
     while (!container.states.gameStates.pause) {
         auto start = std::chrono::steady_clock::now();
 

@@ -9,7 +9,7 @@
 #define SCREEN_Y 240
 #define FPS 30
 #define PLAYER_HEIGHT 100
-#define NUMBEROFFILES 3
+#define NUMBEROFFILES 4
 #define NUMBEROFSTAGES 3
 
 class Container;
@@ -90,6 +90,7 @@ struct Art {
     char menu[30] = "art/menu_art.png";
     char cutscene[30] = "art/cutscene_art2.png";
     char transition[30] = "art/transition.png";
+    char win[30] = "art/win.png";
 };
 
 struct FileData {
@@ -110,6 +111,8 @@ struct SoundFiles {
     char gameMusic[30] = "sounds/game.wav"; // music[2], polargeist from geometry dash cause why not
     char win[30] = "sounds/win.wav"; // sfx[1]
     char lose[30] = "sounds/lose.wav"; // sfx[2]
+    char transition[35] = "sounds/mixkit-air-woosh-1489.wav"; // https://mixkit.co/free-sound-effects/interface/
+    char click[38] = "sounds/mixkit-select-click-1109.wav"; // https://mixkit.co/free-sound-effects/whoosh/
 };
 
 class Files {
@@ -117,7 +120,8 @@ class Files {
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
         std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
         std::vector<std::string> stageOne = {"obj_files/1_water_0_2.obj",
-            "obj_files/1_floe_0_1.obj"};
+            "obj_files/1_floe_0_1.obj",
+            "obj_files/1_end_0_3.obj"};
     public:
         struct Art art;
         struct SoundFiles soundFiles;

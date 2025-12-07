@@ -21,6 +21,10 @@ int main()
     (*container).files.sfx.push_back(win);
     FEHSound lose((*container).files.soundFiles.lose);
     (*container).files.sfx.push_back(lose);
+    FEHSound whoosh((*container).files.soundFiles.transition);
+    (*container).files.sfx.push_back(whoosh);
+    FEHSound click((*container).files.soundFiles.click);
+    (*container).files.sfx.push_back(click);
 
     setVolumes(*container);
     drawMenu(*container);

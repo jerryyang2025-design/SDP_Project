@@ -7,7 +7,7 @@
 
 #define BRIGHTNESS 120000000 // may adjust depending on light source distance
 #define SNOWCOLOR 30
-#define SNOWSIZE 1500
+#define SNOWSIZE 2000
 #define NEAR_PLANE 1.0f
 
 void polygonLightning(struct Objects& objects, struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition);

@@ -19,6 +19,9 @@ Files::Files() { // edit the location and size of each object/stage
     fileMetaData[2].center = {0, 0, 0};
     fileMetaData[2].size = 1000;
     fileMetaData[2].height = 0;
+    fileMetaData[3].center = {0, 0, 400};
+    fileMetaData[3].size = 150;
+    fileMetaData[3].height = 100;
 
     stageMetaData[0].backgroundColor = {150, 190, 230};
     stageMetaData[0].camera = {0, PLAYER_HEIGHT + STARTING_HEIGHT, 0};
