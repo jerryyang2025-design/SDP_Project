@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <limits>
+#include "FEHSound.h"
 
 #define SCREEN_X 320
 #define SCREEN_Y 240
@@ -97,7 +98,7 @@ struct StageData {
 };
 
 struct SoundFiles {
-    char menuMusic[30] = "sounds/menu_Winter-Solace.wav";
+    char menuMusic[30] = "sounds/menu.wav";
 };
 
 class Files {
@@ -109,7 +110,7 @@ class Files {
     public:
         struct Art art;
         struct SoundFiles soundFiles;
-        // probably add one for music and sound effects too
+        std::vector<FEHSound> music;
         void loadFile(Container& container, const std::string& fileName);
         void loadStage(Container& container, int stage);
         Files();

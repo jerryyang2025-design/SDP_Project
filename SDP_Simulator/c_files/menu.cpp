@@ -3,6 +3,7 @@
 #include "FEHLCD.h"
 #include "FEHUtility.h"
 #include "FEHImages.h"
+#include "FEHSound.h"
 #include "header_files/menu.h"
 #include "header_files/data.h"
 #include "header_files/player_inputs.h"
@@ -336,7 +337,7 @@ void drawMenu(Container& container) {
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1);
     LCD.WriteAt("Credits",208,178);
-    
+
     playMusic(container);
 }
 

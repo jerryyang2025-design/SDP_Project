@@ -1,10 +1,13 @@
 #include "FEHLCD.h"
 #include "FEHImages.h"
+#include "FEHSound.h"
 #include "header_files/menu.h"
 
 int main()
 {
     Container* container = new Container();
+    FEHSound music((*container).files.soundFiles.menuMusic); // make sure you know the index of each sound file
+    (*container).files.music.push_back(music);
 
     drawMenu(*container);
     while (1) {
