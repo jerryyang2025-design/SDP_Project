@@ -67,9 +67,15 @@ struct GameStates {
     int timeBetweenFrames = 0; // in milliseconds
 };
 
+struct MusicStates {
+    int musicPlaying = -1;
+    float startTime;
+};
+
 struct States {
     struct PlayerStates playerStates;
     struct GameStates gameStates;
+    struct MusicStates musicStates;
     std::array<int,3> stagePoints = {};
     int currentStage = 0;
 };
@@ -98,7 +104,12 @@ struct StageData {
 };
 
 struct SoundFiles {
-    char menuMusic[30] = "sounds/menu.wav";
+    char menuMusic[30] = "sounds/menu.wav"; // music[0]
+    char cutsceneMusic[30] = "sounds/cutscene.wav"; // music[1]
+    char iceMelting[30] = "sounds/ice_melt.wav"; // sfx[0]
+    char gameMusic[30] = "sounds/game.wav"; // music[2]
+    char win[30] = "sounds/win.wav"; // sfx[1]
+    char lose[30] = "sounds/lose.wav"; // sfx[2]
 };
 
 class Files {
@@ -110,7 +121,7 @@ class Files {
     public:
         struct Art art;
         struct SoundFiles soundFiles;
-        std::vector<FEHSound> music;
+        std::vector<FEHSound> music, sfx;
         void loadFile(Container& container, const std::string& fileName);
         void loadStage(Container& container, int stage);
         Files();
