@@ -82,7 +82,7 @@ struct Rotation {
 struct Art {
     char menu[30] = "art/menu_art.png";
     char cutscene[30] = "art/cutscene_art2.png";
-    char star[30] = "art/Star.png";
+    char transition[30] = "art/transition.png";
 };
 
 struct FileData {

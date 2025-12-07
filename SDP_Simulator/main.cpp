@@ -14,18 +14,26 @@ int main()
             while (LCD.Touch(&x, &y)); // makes sure it doesn't spam between menu and other screens
             if (x >= 195 && x <= 305) {
                 if (y >= 15 && y <= 60) {
+                    buttonFlash(*container, 1);
+                    transition(*container, 2);
                     stageSelect(*container);
                     drawMenu(*container);
                 }
                 if (y >= 65 && y <= 110) {
+                    buttonFlash(*container, 2);
+                    transition(*container, 3);
                     statsPage(*container);
                     drawMenu(*container);
                 }
                 if (y >= 115 && y <= 160) {
+                    buttonFlash(*container, 3);
+                    transition(*container, 4);
                     instructions(*container);
                     drawMenu(*container);
                 }
                 if (y >= 165 && y <= 210) {
+                    buttonFlash(*container, 4);
+                    transition(*container, 5);
                     credits(*container);
                     drawMenu(*container);
                 }
