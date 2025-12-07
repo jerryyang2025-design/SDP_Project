@@ -653,7 +653,8 @@ void checkGameState(Container& container) {
         if (container.states.playerStates.onGround[1] == 3) {
             transition(container, 7);
             drawWin(container);
-            container.states.stagePoints[container.states.currentStage] = 3;
+            float x = container.states.gameStates.frames;
+            container.states.stagePoints[container.states.currentStage] = clamp(-(x + 1000) / 2 + 6000 + 10000000000 / (2222 * (x + 1000)),10000,1000);
             container.states.gameStates.pause = true;
             Sleep(5.0);
             transition(container, 2);
