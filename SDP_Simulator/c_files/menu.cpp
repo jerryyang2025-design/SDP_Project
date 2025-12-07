@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cmath>
 #include "FEHLCD.h"
 #include "FEHUtility.h"
 #include "FEHImages.h"
@@ -9,6 +10,288 @@
 #include "header_files/physics.h"
 #include "header_files/renderer.h"
 #include "header_files/utils.h"
+
+void drawMenu(Container& container);
+void drawStage(Container& container);
+void drawStats(Container& container);
+void drawInstructions(Container& container);
+void drawCredits(Container& container);
+void drawWin(Container& container);
+
+void transition(Container& container, int screen) {
+    // for (int i = 0; i <= SCREEN_Y; i = i + 6) {
+    //     LCD.SetFontColor(BLACK);
+    //     LCD.FillRectangle(0,0,SCREEN_X,i);
+    //     LCD.Update();
+    //     Sleep(0.005);
+    // }
+    for (int i = 0; i <= SCREEN_Y; i = i + 6) { // this is so much better than the black screen
+        FEHImage transition;
+        transition.Open(container.files.art.transition);
+        transition.Draw(0, i - SCREEN_Y);
+        transition.Close();
+        LCD.Update();
+        Sleep(0.005);
+    }
+    Sleep(0.4);
+    if (screen == 1) { // menu
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawMenu(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 2) { // stages
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawStage(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 3) { // stats
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawStats(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 4) { // instructions
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawInstructions(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 5) { // credits
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawCredits(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 6) { // cutscene
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            FEHImage cutscene1;
+            cutscene1.Open(container.files.art.menu);
+            cutscene1.Draw(0, 0);
+            cutscene1.Close();
+
+            LCD.SetFontColor(BLACK);
+            LCD.SetFontScale(0.5);
+            LCD.WriteAt("What a lovely day...",40,160);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    } else if (screen == 7) { // win
+        for (int i = 0; i < SCREEN_Y; i = i + 6) {
+            drawWin(container);
+            FEHImage transition;
+            transition.Open(container.files.art.transition);
+            transition.Draw(0, i);
+            transition.Close();
+            LCD.Update();
+            Sleep(0.005);
+        }
+    }
+}
+
+void circleTransition() {
+    for (int i = 0; i <= 170; i = i + 2) {
+        LCD.SetFontColor(BLACK);
+        if (pow(i,1.5) / 10.0f <= SCREEN_Y / 2) {
+            LCD.FillCircle(SCREEN_X / 2,SCREEN_Y / 2,pow(i,1.5) / 10.0f);
+        } else {
+            LCD.SetBackgroundColor(BLACK);
+            LCD.Clear();
+        }
+        LCD.Update();
+    }
+    Sleep(1.0);
+}
+
+void buttonFlash(Container& container, int button) {
+    if (button == 1) { // menu 1
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(195,15,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(200,20,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1);
+            LCD.WriteAt("Stages",212,28);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(195,15,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 2) { // menu 2
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(195,65,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(200,70,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1);
+            LCD.WriteAt("Stats",219,78);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(195,65,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 3) { // menu 3
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(195,115,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(200,120,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(0.5);
+            LCD.WriteAt("Instructions",214,131);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(195,115,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 4) { // menu 4
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(195,165,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(200,170,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1);
+            LCD.WriteAt("Credits",208,178);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(195,165,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 5) { // menu return
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(50,10,220,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(55,15,210,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1.5);
+            LCD.WriteAt("To Menu",100,20);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(50,10,220,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 6) { // stage 1
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(50,60,220,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(55,65,210,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1.5);
+            LCD.WriteAt("Stage 1",100,70);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(50,60,220,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 7) { // stage 2
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(50,110,220,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(55,115,210,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1.5);
+            LCD.WriteAt("Stage 2",100,120);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(50,110,220,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 8) { // stage 3
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(50,160,220,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(55,165,210,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(1.5);
+            LCD.WriteAt("Stage 3",100,170);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(50,160,220,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 9) { // lose return
+        for (int i = 0; i < 6; i++) { // temp, will be replaced
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(25,100,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(30,105,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(0.5);
+            LCD.WriteAt("Return to Menu",37,116);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(25,100,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    } else if (button == 10) { // try again
+        for (int i = 0; i < 6; i++) {
+            LCD.SetFontColor(GRAY);
+            LCD.FillRectangle(185,100,110,45);
+            LCD.SetFontColor(DARKGRAY);
+            LCD.FillRectangle(190,105,100,35);
+            LCD.SetFontColor(ROYALBLUE);
+            LCD.SetFontScale(0.5);
+            LCD.WriteAt("Try Again",212,116);
+            if (i % 2 == 0) {
+                LCD.SetFontColor(WHITE);
+                LCD.FillRectangle(185,100,110,45);
+            }
+            LCD.Update();
+            Sleep(0.06);
+        }
+    }
+    Sleep(0.1);
+}
 
 void drawMenu(Container& container) {
     FEHImage menu;
@@ -103,20 +386,25 @@ void stageSelect(Container& container) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
                 if (y >= 10 && y <= 55) {
+                    buttonFlash(container, 5);
+                    transition(container, 1);
                     return;
                 }
                 if (y >= 60 && y <= 105) {
+                    buttonFlash(container, 6);
                     container.files.loadStage(container,1);
                     container.states.currentStage = 1;
                     runGame(container);
                     drawStage(container);
                 } else if (y >= 110 && y <= 155) {
+                    buttonFlash(container, 7);
                     container.files.loadStage(container,2);
                     container.states.currentStage = 2;
                     runGame(container);
                     drawStage(container);
                 }
                  else if (y >= 160 && y <= 205) {
+                    buttonFlash(container, 8);
                     container.files.loadStage(container,3);
                     container.states.currentStage = 3;
                     runGame(container);
@@ -169,6 +457,8 @@ void statsPage(Container& container) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
                 if (y >= 10 && y <= 55) {
+                    buttonFlash(container, 5);
+                    transition(container, 1);
                     return;
                 }
             }
@@ -211,6 +501,8 @@ void instructions(Container& container) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
                 if (y >= 10 && y <= 55) {
+                    buttonFlash(container, 5);
+                    transition(container, 1);
                     return;
                 }
             }
@@ -253,6 +545,8 @@ void credits(Container& container) {
             while (LCD.Touch(&x, &y));
             if (x >= 50 && x <= 270) {
                 if (y >= 10 && y <= 55) {
+                    buttonFlash(container, 5);
+                    transition(container, 1);
                     return;
                 }
             }
@@ -263,13 +557,8 @@ void credits(Container& container) {
 }
 
 void playCutscene(Container& container) { // probably add music and sound effects throughout
-    LCD.SetBackgroundColor(BLACK);
-    LCD.Clear();
-    LCD.Update();
-    Sleep(1.0);
-
-    FEHImage cutscene1; // also maybe add text or something so it doesn't look like a random static image even though it is
-    cutscene1.Open(container.files.art.menu); // idk maybe we can make the text flash on the screen to add "movement"
+    FEHImage cutscene1;
+    cutscene1.Open(container.files.art.menu);
     cutscene1.Draw(0, 0);
     cutscene1.Close();
 
@@ -282,7 +571,7 @@ void playCutscene(Container& container) { // probably add music and sound effect
     LCD.SetBackgroundColor(BLACK);
     LCD.Clear();
     LCD.Update();
-    Sleep(1.0);
+    Sleep(0.2);
 
     FEHImage cutscene2;
     cutscene2.Open(container.files.art.cutscene);
@@ -295,11 +584,6 @@ void playCutscene(Container& container) { // probably add music and sound effect
     LCD.WriteAt("I need to get out of here.",40,190);
     LCD.Update();
     Sleep(5.0);
-
-    LCD.SetBackgroundColor(BLACK);
-    LCD.Clear();
-    LCD.Update();
-    Sleep(1.0);
 }
 
 void drawWin(Container& container) {
@@ -310,45 +594,90 @@ void drawWin(Container& container) {
     LCD.SetFontScale(1.5);
     LCD.WriteAt("Stage Beat!",60,30);
 
-    FEHImage star;
-    star.Open(container.files.art.star);
-    star.Draw(72, 70);
-    star.Close();
-
     LCD.Update();
 }
 
 void drawLose() {
-    LCD.SetBackgroundColor(WHITE);
+    LCD.SetBackgroundColor(BLACK);
     LCD.Clear();
+    for (float i = 0; i <= 1; i = i + 0.05) {
+        LCD.SetBackgroundColor(LCD.ScaleColor(GRAY,i / 4.0f));
+        LCD.Clear();
 
-    LCD.SetFontColor(MAROON);
-    LCD.SetFontScale(1.5);
-    LCD.WriteAt("Stage Lost!",60,30);
+        LCD.SetFontColor(LCD.ScaleColor(MAROON,i));
+        LCD.SetFontScale(1.5);
+        LCD.WriteAt("Stage Lost!",60,30);
 
-    LCD.Update();
+        Sleep(0.08);
+        LCD.Update();
+    }
+    Sleep(0.5);
+
+    LCD.SetFontColor(GRAY);
+    LCD.FillRectangle(25,100,110,45);
+    LCD.SetFontColor(DARKGRAY);
+    LCD.FillRectangle(30,105,100,35);
+    LCD.SetFontColor(ROYALBLUE);
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("Return to Menu",37,116);
+
+    LCD.SetFontColor(GRAY);
+    LCD.FillRectangle(185,100,110,45);
+    LCD.SetFontColor(DARKGRAY);
+    LCD.FillRectangle(190,105,100,35);
+    LCD.SetFontColor(ROYALBLUE);
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("Try Again",212,116);
+}
+
+void loseScreen(Container& container) {
+    drawLose();
+
+    float x, y;
+    while (true) {
+        if (LCD.Touch(&x, &y)) {
+            while (LCD.Touch(&x, &y));
+            if (y >= 100 && y <= 145) {
+                if (x >= 25 && x <= 135) {
+                    buttonFlash(container, 9);
+                    transition(container, 2);
+                    container.states.gameStates.pause = true;
+                    return;
+                }
+                if (x >= 185 && x <= 295) {
+                    buttonFlash(container, 10);
+                    circleTransition();
+                    container.files.loadStage(container,container.states.currentStage);
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void checkGameState(Container& container) {
     if (container.states.playerStates.onGround[0]) {
         if (container.states.playerStates.onGround[1] == 3) {
+            transition(container, 7);
             drawWin(container);
             container.states.stagePoints[container.states.currentStage] = 3;
             container.states.gameStates.pause = true;
-            Sleep(4.0);
+            Sleep(5.0);
+            transition(container, 2);
         } else if (container.states.playerStates.onGround[1] == 4) {
-            drawLose();
-            Sleep(4.0);
-            container.files.loadStage(container,container.states.currentStage);
+            circleTransition();
+            loseScreen(container);
         }
     }
 }
 
 void runGame(Container& container) {
     if (!container.states.gameStates.cutscenePlayed) {
-        // playCutscene(container);
+        transition(container, 6);
+        playCutscene(container);
         container.states.gameStates.cutscenePlayed = true;
     }
+    circleTransition();
     while (!container.states.gameStates.pause) {
         auto start = std::chrono::steady_clock::now();
 
