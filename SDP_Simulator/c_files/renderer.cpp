@@ -1,4 +1,5 @@
 #include <math.h>
+#include "windows.h"
 #include "FEHLCD.h"
 #include "header_files/data.h"
 #include "header_files/utils.h"
@@ -8,6 +9,140 @@
 #define SNOWCOLOR 30
 #define SNOWSIZE 1500
 #define NEAR_PLANE 1.0f
+
+void polygonLightning(struct Objects& objects, struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition);
+void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition);
+void clipPolygon(Objects& objects, Object& object, int polygon);
+
+struct LightingThreadTask {
+    Objects* objects;
+    int startObject;
+    int endObject;
+    int mode;
+};
+
+struct ClipThreadTask {
+    Objects* objects;
+    int startObject;
+    int endObject;
+    int mode;
+};
+
+struct ProjectThreadTask {
+    const Objects* objects;
+    const std::vector<Object>* objectList;
+    int startIndex;
+    int endIndex;
+    std::vector<std::array<float,4>> projectedVertices;
+    std::vector<std::array<int,3>> projectedFaces;
+    std::vector<std::array<int,3>> projectedFaceColors;
+};
+
+DWORD WINAPI lightingWorker(LPVOID lpParameter) {
+    LightingThreadTask* task = (LightingThreadTask*)lpParameter;
+    Objects* objects = (*task).objects;
+
+    if ((*task).mode == 0) {
+        for (int i = (*task).startObject; i < (*task).endObject; i++) {
+            for (int j = 0; j < (*objects).platforms[i].faces.size(); j++) {
+                polygonLightning(*objects, (*objects).platforms[i], j, (*objects).lightSource, (*objects).cameraPosition);
+                polygonRefraction((*objects).platforms[i], j, (*objects).lightSource, (*objects).cameraPosition);
+            }
+        }
+    }
+    else {
+        for (int i = (*task).startObject; i < (*task).endObject; i++) {
+            for (int j = 0; j < (*objects).water.faces.size(); j++) {
+                polygonLightning(*objects, (*objects).water, j, (*objects).lightSource, (*objects).cameraPosition);
+                polygonRefraction((*objects).water, j, (*objects).lightSource, (*objects).cameraPosition);
+            }
+        }
+    }
+
+    return 0;
+}
+
+DWORD WINAPI clipWorker(LPVOID lpParameter) {
+    ClipThreadTask* task = (ClipThreadTask*)lpParameter;
+    Objects* obj = (*task).objects;
+
+    if ((*task).mode == 0) {
+        for (int i = (*task).startObject; i < (*task).endObject; i++) {
+            (*obj).platforms[i].tempVertices.clear();
+            (*obj).platforms[i].tempFaces.clear();
+            (*obj).platforms[i].tempFaceColors.clear();
+
+            for (int j = 0; j < (*obj).platforms[i].faces.size(); j++) {
+                clipPolygon(*obj, (*obj).platforms[i], j);
+            }
+        }
+    }
+
+    if ((*task).mode == 1) {
+        (*obj).end.tempVertices.clear();
+        (*obj).end.tempFaces.clear();
+        (*obj).end.tempFaceColors.clear();
+
+        for (int j = 0; j < (*obj).end.faces.size(); j++) {
+            clipPolygon(*obj, (*obj).end, j);
+        }
+    }
+
+    if ((*task).mode == 2) {
+        (*obj).water.tempVertices.clear();
+        (*obj).water.tempFaces.clear();
+        (*obj).water.tempFaceColors.clear();
+
+        for (int j = 0; j < (*obj).water.faces.size(); j++) {
+            clipPolygon(*obj, (*obj).water, j);
+        }
+    }
+
+    return 0;
+}
+
+DWORD WINAPI projectWorker(LPVOID lpParameter) {
+    ProjectThreadTask* task = (ProjectThreadTask*)lpParameter;
+
+    const Objects* objects = (*task).objects;
+
+    for (int i = (*task).startIndex; i < (*task).endIndex; i++) {
+        const Object& obj = (*(*task).objectList)[i];
+        int vertexBase = (*task).projectedVertices.size();
+
+        for (int j = 0; j < obj.tempVertices.size(); j++) {
+            std::array<float,2> depthResults = depth(*objects,obj.tempVertices[j]);
+            std::array<float,2> xResults = fieldOfViewBoundSide(*objects,obj.tempVertices[j]);
+            std::array<float,2> yResults = fieldOfViewBoundUp(*objects,obj.tempVertices[j]);
+
+            float hidden = 0;
+            if ((depthResults[1] > 0.5) || (xResults[1] > 0.5) || (yResults[1] > 0.5)) {
+                hidden = 1;
+            }
+
+            int x = round(xResults[0] + SCREEN_X / 2);
+            int y = round(-yResults[0] + SCREEN_Y / 2);
+            float depth = depthResults[0];
+
+            std::array<float,4> screenVertex = {x, y, depth, hidden};
+            (*task).projectedVertices.push_back(screenVertex);
+        }
+
+        for (int j = 0; j < obj.tempFaces.size(); j++) {
+            int f0 = obj.tempFaces[j][0] + vertexBase;
+            int f1 = obj.tempFaces[j][1] + vertexBase;
+            int f2 = obj.tempFaces[j][2] + vertexBase;
+
+            if (!((*task).projectedVertices[f0][3] > 0.5 || (*task).projectedVertices[f1][3] > 0.5 || (*task).projectedVertices[f2][3] > 0.5)) {
+                std::array<int,3> face = {f0,f1,f2};
+                (*task).projectedFaces.push_back(face);
+                (*task).projectedFaceColors.push_back(obj.tempFaceColors[j]);
+            }
+        }
+    }
+
+    return 0;
+}
 
 /*
 Function to calculate the brightness value of a single polygon
@@ -124,25 +259,76 @@ Function to calculate the lighting/color of every polygon
 */
 
 void handleLighting(struct Objects& objects) {
-    for (int i = 0; i < objects.platforms.size(); i++) {
-        for (int j = 0; j < objects.platforms[i].faces.size(); j++) {
-            polygonLightning(objects,objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
-            polygonRefraction(objects.platforms[i],j,objects.lightSource,objects.cameraPosition);
+    int numThreads = 16;
+
+    HANDLE threads[32];
+    LightingThreadTask tasks[32];
+    int threadCount = 0;
+
+    int platformCount = objects.platforms.size();
+    int perThread = (platformCount + numThreads - 1) / numThreads;
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end = (t + 1) * perThread;
+
+        if (start >= platformCount) {
+            break;
         }
-    }
-    for (int i = 0; i < objects.movingPlatforms.size(); i++) {
-        for (int j = 0; j < objects.movingPlatforms[i].faces.size(); j++) {
-            polygonLightning(objects,objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
-            polygonRefraction(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+        if (end > platformCount) {
+            end = platformCount;
         }
+
+        tasks[threadCount].objects = &objects;
+        tasks[threadCount].startObject = start;
+        tasks[threadCount].endObject = end;
+        tasks[threadCount].mode = 0;
+
+        threads[threadCount] = CreateThread(NULL, 0, lightingWorker, &tasks[threadCount], 0, NULL);
+
+        threadCount++;
     }
+
+    int waterPolyCount = objects.water.faces.size();
+    perThread = (waterPolyCount + numThreads - 1) / numThreads;
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end = (t + 1) * perThread;
+
+        if (start >= waterPolyCount) {
+            break;
+        }
+        if (end > waterPolyCount) {
+            end = waterPolyCount;
+        }
+
+        tasks[threadCount].objects = &objects;
+        tasks[threadCount].startObject = start;
+        tasks[threadCount].endObject = end;
+        tasks[threadCount].mode = 1;
+
+        threads[threadCount] = CreateThread(NULL, 0, lightingWorker, &tasks[threadCount], 0, NULL);
+
+        threadCount++;
+    }
+
+    WaitForMultipleObjects(threadCount, threads, TRUE, INFINITE);
+
+    for (int i = 0; i < threadCount; i++) {
+        CloseHandle(threads[i]);
+    }
+    
+    // for (int i = 0; i < objects.movingPlatforms.size(); i++) {
+    //     for (int j = 0; j < objects.movingPlatforms[i].faces.size(); j++) {
+    //         polygonLightning(objects,objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+    //         polygonRefraction(objects.movingPlatforms[i],j,objects.lightSource,objects.cameraPosition);
+    //     }
+    // }
+
     for (int j = 0; j < objects.end.faces.size(); j++) {
         polygonLightning(objects,objects.end,j,objects.lightSource,objects.cameraPosition);
         polygonRefraction(objects.end,j,objects.lightSource,objects.cameraPosition);
-    }
-    for (int j = 0; j < objects.water.faces.size(); j++) {
-        polygonLightning(objects,objects.water,j,objects.lightSource,objects.cameraPosition);
-        polygonRefraction(objects.water,j,objects.lightSource,objects.cameraPosition);
     }
 }
 
@@ -236,21 +422,60 @@ void clipAll(Container& container) {
     container.objects.end.tempFaces.clear();
     container.objects.end.tempFaceColors.clear();
 
-    for (int i = 0; i < container.objects.platforms.size(); i++) {
-        for (int j = 0; j < container.objects.platforms[i].faces.size(); j++) {
-            clipPolygon(container.objects, container.objects.platforms[i], j);
+    const int numThreads = 16;
+
+    HANDLE threads[64];
+    ClipThreadTask tasks[64];
+    int tCount = 0;
+
+    Objects& obj = container.objects;
+
+    int count = obj.platforms.size();
+    int perThread = (count + numThreads - 1) / numThreads;
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end   = (t + 1) * perThread;
+
+        if (start >= count) {
+            break;
         }
-    }
-    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
-        for (int j = 0; j < container.objects.movingPlatforms[i].faces.size(); j++) {
-            clipPolygon(container.objects, container.objects.movingPlatforms[i], j);
+        if (end > count) {
+            end = count;
         }
+
+        tasks[tCount].objects = &obj;
+        tasks[tCount].startObject = start;
+        tasks[tCount].endObject = end;
+        tasks[tCount].mode = 0;
+
+        threads[tCount] = CreateThread(NULL, 0, clipWorker, &tasks[tCount], 0, NULL);
+
+        tCount++;
     }
-    for (int j = 0; j < container.objects.end.faces.size(); j++) {
-        clipPolygon(container.objects, container.objects.end, j);
-    }
-    for (int j = 0; j < container.objects.water.faces.size(); j++) {
-        clipPolygon(container.objects, container.objects.water, j);
+
+    tasks[tCount].objects = &obj;
+    tasks[tCount].startObject = 0;
+    tasks[tCount].endObject = 1;
+    tasks[tCount].mode = 1;
+
+    threads[tCount] = CreateThread(NULL, 0, clipWorker, &tasks[tCount], 0, NULL);
+
+    tCount++;
+
+    tasks[tCount].objects = &obj;
+    tasks[tCount].startObject = 0;
+    tasks[tCount].endObject = 1;
+    tasks[tCount].mode = 2;
+
+    threads[tCount] = CreateThread(NULL, 0, clipWorker, &tasks[tCount], 0, NULL);
+
+    tCount++;
+
+    WaitForMultipleObjects(tCount, threads, TRUE, INFINITE);
+
+    for (int i = 0; i < tCount; i++) {
+        CloseHandle(threads[i]);
     }
 }
 
@@ -308,69 +533,107 @@ void projectAll(Container& container) {
     container.screen.effects.clear();
     container.screen.faces.clear();
     container.screen.faceColors.clear();
-    for (int i = 0; i < container.objects.platforms.size(); i++) {
-        int size = container.screen.vertices.size();
-        for (int j = 0; j < container.objects.platforms[i].tempVertices.size(); j++) {
-            project(container.objects,container.objects.platforms[i].tempVertices,container.screen,j);
+    
+    const int numThreads = 16;
+    HANDLE threads[numThreads];
+    ProjectThreadTask tasks[numThreads];
+
+    int totalObjects = container.objects.platforms.size();
+    int perThread = (totalObjects + numThreads - 1) / numThreads;
+    int threadIndex = 0;
+
+    std::vector<Object> allObjects = container.objects.platforms;
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end = (start + perThread);
+        if (start >= allObjects.size()) {
+            break;
         }
-        for (int j = 0; j < container.objects.platforms[i].tempFaces.size(); j++) {
-            if (!(container.screen.vertices[container.objects.platforms[i].tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.platforms[i].tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.platforms[i].tempFaces[j][2] + size][3] > 0.5)) {
-                std::array<int,3> face = container.objects.platforms[i].tempFaces[j], faceColor = container.objects.platforms[i].tempFaceColors[j];
-                for (int k = 0; k < 3; k++) {
-                    face[k] += size;
-                }
-                container.screen.faces.push_back(face);
-                container.screen.faceColors.push_back(faceColor);
+        if (end > allObjects.size()) {
+            end = allObjects.size();
+        }
+
+        tasks[threadIndex].objects = &container.objects;
+        tasks[threadIndex].objectList = &allObjects;
+        tasks[threadIndex].startIndex = start;
+        tasks[threadIndex].endIndex = end;
+
+        threads[threadIndex] = CreateThread(NULL,0,projectWorker,&tasks[threadIndex],0,NULL);
+        threadIndex++;
+    }
+
+    WaitForMultipleObjects(threadIndex, threads, TRUE, INFINITE);
+
+    for (int t = 0; t < threadIndex; t++) {
+        int baseIndex = container.screen.vertices.size();
+        for (int v = 0; v < tasks[t].projectedVertices.size(); v++) {
+            container.screen.vertices.push_back(tasks[t].projectedVertices[v]);
+        }
+        for (int f = 0; f < tasks[t].projectedFaces.size(); f++) {
+            std::array<int,3> face = tasks[t].projectedFaces[f];
+            for (int k = 0; k < 3; k++) {
+                face[k] += baseIndex;
             }
+            container.screen.faces.push_back(face);
+            container.screen.faceColors.push_back(tasks[t].projectedFaceColors[f]);
         }
     }
-    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
-        int size = container.screen.vertices.size();
-        for (int j = 0; j < container.objects.movingPlatforms[i].tempVertices.size(); j++) {
-            project(container.objects,container.objects.movingPlatforms[i].tempVertices,container.screen,j);
-        }
-        for (int j = 0; j < container.objects.movingPlatforms[i].tempFaces.size(); j++) {
-            if (!(container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][2] + size][3] > 0.5)) {
-                std::array<int,3> face = container.objects.movingPlatforms[i].tempFaces[j], faceColor = container.objects.movingPlatforms[i].tempFaceColors[j];
-                for (int k = 0; k < 3; k++) {
-                    face[k] += size;
-                }
-                container.screen.faces.push_back(face);
-                container.screen.faceColors.push_back(faceColor);
-            }
-        }
-    }
-    int size = container.screen.vertices.size();
+
+    int endBase = container.screen.vertices.size();
     for (int j = 0; j < container.objects.end.tempVertices.size(); j++) {
-        project(container.objects,container.objects.end.tempVertices,container.screen,j);
+        project(container.objects, container.objects.end.tempVertices, container.screen, j);
     }
     for (int j = 0; j < container.objects.end.tempFaces.size(); j++) {
-        if (!(container.screen.vertices[container.objects.end.tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + size][3] > 0.5)) {
-            std::array<int,3> face = container.objects.end.tempFaces[j], faceColor = container.objects.end.tempFaceColors[j];
+        if (!(container.screen.vertices[container.objects.end.tempFaces[j][0] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + endBase][3] > 0.5)) {
+            std::array<int,3> face = container.objects.end.tempFaces[j];
             for (int k = 0; k < 3; k++) {
-                face[k] += size;
+                face[k] += endBase;
             }
             container.screen.faces.push_back(face);
-            container.screen.faceColors.push_back(faceColor);
+            container.screen.faceColors.push_back(container.objects.end.tempFaceColors[j]);
         }
     }
-    size = container.screen.vertices.size();
+
+    int waterBase = container.screen.vertices.size();
     for (int j = 0; j < container.objects.water.tempVertices.size(); j++) {
-        project(container.objects,container.objects.water.tempVertices,container.screen,j);
+        project(container.objects, container.objects.water.tempVertices, container.screen, j);
     }
     for (int j = 0; j < container.objects.water.tempFaces.size(); j++) {
-        if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + size][3] > 0.5)) {
-            std::array<int,3> face = container.objects.water.tempFaces[j], faceColor = container.objects.water.tempFaceColors[j];
+        if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] > 0.5)) {
+            std::array<int,3> face = container.objects.water.tempFaces[j];
             for (int k = 0; k < 3; k++) {
-                face[k] += size;
+                face[k] += waterBase;
             }
             container.screen.faces.push_back(face);
-            container.screen.faceColors.push_back(faceColor);
+            container.screen.faceColors.push_back(container.objects.water.tempFaceColors[j]);
         }
     }
+
     for (int j = 0; j < container.objects.snow.size(); j++) {
-        projectEffects(container.objects,container.objects.snow,container.screen,j);
+        projectEffects(container.objects, container.objects.snow, container.screen, j);
     }
+
+    for (int t = 0; t < threadIndex; t++) {
+        CloseHandle(threads[t]);
+    }
+
+    // for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
+    //     int size = container.screen.vertices.size();
+    //     for (int j = 0; j < container.objects.movingPlatforms[i].tempVertices.size(); j++) {
+    //         project(container.objects,container.objects.movingPlatforms[i].tempVertices,container.screen,j);
+    //     }
+    //     for (int j = 0; j < container.objects.movingPlatforms[i].tempFaces.size(); j++) {
+    //         if (!(container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][0] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][1] + size][3] > 0.5 || container.screen.vertices[container.objects.movingPlatforms[i].tempFaces[j][2] + size][3] > 0.5)) {
+    //             std::array<int,3> face = container.objects.movingPlatforms[i].tempFaces[j], faceColor = container.objects.movingPlatforms[i].tempFaceColors[j];
+    //             for (int k = 0; k < 3; k++) {
+    //                 face[k] += size;
+    //             }
+    //             container.screen.faces.push_back(face);
+    //             container.screen.faceColors.push_back(faceColor);
+    //         }
+    //     }
+    // }
 }
 
 /*

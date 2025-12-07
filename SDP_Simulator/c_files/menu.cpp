@@ -337,7 +337,6 @@ void drawMenu(Container& container) {
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1);
     LCD.WriteAt("Credits",208,178);
-
 }
 
 void drawStage(Container& container) {
