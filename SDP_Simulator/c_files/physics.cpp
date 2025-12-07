@@ -48,11 +48,11 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
             normal[i] *= depth;
         }
         float normalAngle = angle(normal,container.objects.universalUp);
-        depth = depth * sin(normalAngle); // test this
+        depth = 0; // depth * sin(normalAngle);
         float vertical = magnitudeInDirection(container.objects.universalUp,normal) + depth;
         std::array<float,3> move = {0,vertical,0};
         movePlayer(container,move);
-    // } else if (slant == 1) {
+    } // else if (slant == 1) {
     //     float magnitude;
     //     if ((STEP_AMOUNT - step) > 0) {
     //         magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
@@ -64,41 +64,41 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
     //         normal[i] *= magnitude;
     //         container.states.playerStates.persistentVelocity[i] += normal[i];
     //     }
-
+    //
     //     normalize(normal);
     //     for (int i = 0; i < 3; i++) {
     //         normal[i] *= depth;
     //     }
     //     movePlayer(container,normal);
-    } else if (slant == 2) {
-        float magnitude;
-        if ((STEP_AMOUNT - step) > 0) {
-            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
-        } else {
-            magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
-        }
-        normalize(normal);
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= magnitude;
-        }
-        magnitude = pythag(normal[0],normal[2]);
-        normalize(normal);
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= magnitude;
-        }
-        container.states.playerStates.persistentVelocity[0] += normal[0];
-        container.states.playerStates.persistentVelocity[2] += normal[2];
+    // } else if (slant == 2) {
+    //     float magnitude;
+    //     if ((STEP_AMOUNT - step) > 0) {
+    //         magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity) / (STEP_AMOUNT - step);
+    //     } else {
+    //         magnitude = magnitudeInDirection(reverseNormal,container.states.playerStates.persistentVelocity);
+    //     }
+    //     normalize(normal);
+    //     for (int i = 0; i < 3; i++) {
+    //         normal[i] *= magnitude;
+    //     }
+    //     magnitude = pythag(normal[0],normal[2]);
+    //     normalize(normal);
+    //     for (int i = 0; i < 3; i++) {
+    //         normal[i] *= magnitude;
+    //     }
+    //     container.states.playerStates.persistentVelocity[0] += normal[0];
+    //     container.states.playerStates.persistentVelocity[2] += normal[2];
 
-        normal[1] = 0;
-        normalize(normal);
-        for (int i = 0; i < 3; i++) {
-            normal[i] *= depth;
-        }
-        magnitude = pythag(normal[0],normal[2]);
-        normalize(normal);
-        std::array<float,3> move = {normal[0] * magnitude,0,normal[2] * magnitude};
-        movePlayer(container,move);
-    }
+    //     normal[1] = 0;
+    //     normalize(normal);
+    //     for (int i = 0; i < 3; i++) {
+    //         normal[i] *= depth;
+    //     }
+    //     magnitude = pythag(normal[0],normal[2]);
+    //     normalize(normal);
+    //     std::array<float,3> move = {normal[0] * magnitude,0,normal[2] * magnitude};
+    //     movePlayer(container,move);
+    // }
 }
 
 void polygonCollision(Container& container, const struct Object& object, int type, int polygon, int step) {
@@ -134,14 +134,14 @@ void polygonCollision(Container& container, const struct Object& object, int typ
                 if (magnitudeInDirection(normalVectorOne,toPointVectorOne) > 0 && magnitudeInDirection(normalVectorTwo,toPointVectorTwo) > 0 && magnitudeInDirection(normalVectorThree,toPointVectorThree) > 0) {
                     container.states.playerStates.onGround = {1,type};
                     float angleOfPoly = angle(normalVector,container.objects.universalUp) * 180.0f / pi;
-                    int slant;
-                    if (angleOfPoly <= 15 || angleOfPoly >= 165) {
-                        slant = 0;
-                    } else if (angleOfPoly >= 75 && angleOfPoly <= 105) {
-                        slant = 2;
-                    } else {
-                        slant = 1;
-                    }
+                    int slant = 0;
+                    // if (angleOfPoly <= 15 || angleOfPoly >= 165) {
+                    //     slant = 0;
+                    // } else if (angleOfPoly >= 75 && angleOfPoly <= 105) {
+                    //     slant = 2;
+                    // } else {
+                    //     slant = 1;
+                    // }
                     collisionCorrection(container, fabs(penetrationDepth), slant, normalVector, step);
                 }
             }
@@ -163,9 +163,7 @@ void handleCollision(Container& container, int step) {
     for (int j = 0; j < container.objects.end.hitbox.size(); j++) {
         polygonCollision(container,container.objects.end,3,j,step);
     }
-    for (int j = 0; j < container.objects.playerHitbox.size(); j++) {
-        if (container.objects.playerHitbox[j][1] < WATER_HEIGHT) {
-            container.states.playerStates.onGround = {1,4};
-        }
+    if (container.objects.cameraPosition[1] < WATER_HEIGHT + PLAYER_HEIGHT) {
+        container.states.playerStates.onGround = {1,4};
     }
 }

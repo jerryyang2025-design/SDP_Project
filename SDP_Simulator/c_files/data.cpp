@@ -5,22 +5,22 @@
 #include "header_files/environment_effects.h"
 
 #define ICECOLOR {230, 230, 240}
-#define WATERCOLOR {190, 215, 240}
+#define WATERCOLOR {190, 215, 250}
 #define ICEREFLECTION 1
 #define WATERREFLECTION 0.5
-#define ICEREFRACTION 20
+#define ICEREFRACTION 15
 #define WATERREFRACTION 5
 #define STARTING_HEIGHT 500
 
 Files::Files() { // edit the location and size of each object/stage
     fileMetaData[1].center = {0, 0, 0};
     fileMetaData[1].size = 150;
-    fileMetaData[1].height = 50;
+    fileMetaData[1].height = 100;
     fileMetaData[2].center = {0, 0, 0};
     fileMetaData[2].size = 1000;
     fileMetaData[2].height = 0;
 
-    stageMetaData[0].backgroundColor = {140, 170, 210};
+    stageMetaData[0].backgroundColor = {150, 190, 230};
     stageMetaData[0].camera = {0, PLAYER_HEIGHT + STARTING_HEIGHT, 0};
 }
 
@@ -141,7 +141,7 @@ void resetData(Container& container) { // does not reset end or water, since tho
 
 void Files::loadStage(Container& container, int stage) {
     resetData(container);
-    // createSnow(container);
+    createSnow(container);
 
     if (stage == 1) {
         container.objects.backgroundColor = stageMetaData[0].backgroundColor;
