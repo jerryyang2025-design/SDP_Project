@@ -19,11 +19,21 @@ void applyDrag(Container& container) {
     container.states.playerStates.persistentVelocity[2] *= DRAG;
 }
 
+/*
+applies gravity and drag forces to the player's persistent velocity
+purpose is the simulate physical forces
+Author: Jerry
+*/
 void handlePhysics(Container& container) {
     applyDrag(container);
     applyGravity(container,container.states.gameStates.timeBetweenFrames);
 }
 
+/*
+moves the player and hitbox using a movement vector
+purpose is to simplify moving the camera and hitbox to a single function call
+Author: Jerry
+*/
 void movePlayer(Container& container, std::array<float,3> movement) {
     for (int i = 0; i < 3; i++) {
         container.objects.cameraPosition[i] += movement[i];
@@ -35,6 +45,11 @@ void movePlayer(Container& container, std::array<float,3> movement) {
     }
 }
 
+/*
+resets the vertical component of persistent velocity and move the player up when collision is detected
+purpose is to prevent the player from falling through the platforms
+Author: Jerry
+*/
 void collisionCorrection(Container& container, float depth, int slant, std::array<float,3> normal, int step) {
     std::array<float,3> reverseNormal;
     for (int i = 0; i < 3; i++) {
@@ -101,6 +116,11 @@ void collisionCorrection(Container& container, float depth, int slant, std::arra
     // }
 }
 
+/*
+uses vector projection and same side testing to detect collision with a polygon
+purpose is to let the other functions know when the player has collided and with what object they collided with
+Author: Jerry
+*/
 void polygonCollision(Container& container, const struct Object& object, int type, int polygon, int step) {
     if (distance(object.center[0] - container.objects.cameraPosition[0],object.center[1] - container.objects.cameraPosition[1],object.center[2] - container.objects.cameraPosition[2]) < COLLISION_TEST_BOUNDS) {
         std::array<float,3> center,vectorOne,vectorTwo,sideOne,sideTwo,sideThree,normalVector;
@@ -149,6 +169,11 @@ void polygonCollision(Container& container, const struct Object& object, int typ
     }
 }
 
+/*
+iterates through every object and applies collision testing
+purpose is the group all collision tests into a single function
+Author: Jerry
+*/
 void handleCollision(Container& container, int step) {
     for (int i = 0; i < container.objects.platforms.size(); i++) {
         for (int j = 0; j < container.objects.platforms[i].hitbox.size(); j++) {

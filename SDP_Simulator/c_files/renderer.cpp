@@ -14,6 +14,12 @@ void polygonLightning(struct Objects& objects, struct Object& object, int polygo
 void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition);
 void clipPolygon(Objects& objects, Object& object, int polygon);
 
+/*
+structs used to separate heavy math into threads to speed up processing
+includes the start and end indexes for a thread to iterate through
+reference used for all threading functions and structs: https://www.cs.uah.edu/~mdb0013/Common/CodeVault/Code/WindowsThreads.html
+Author: Jerry
+*/
 struct LightingThreadTask {
     Objects* objects;
     int startObject;
@@ -38,6 +44,11 @@ struct ProjectThreadTask {
     std::vector<std::array<int,3>> projectedFaceColors;
 };
 
+/*
+helper funtions used for threading
+iterates through the start and end indexes for a thread, performing the appropriate function calls for each
+Author: Jerry
+*/
 DWORD WINAPI lightingWorker(LPVOID lpParameter) {
     LightingThreadTask* task = (LightingThreadTask*)lpParameter;
     Objects* objects = (*task).objects;
@@ -152,7 +163,9 @@ DWORD WINAPI projectWorker(LPVOID lpParameter) {
 }
 
 /*
-Function to calculate the brightness value of a single polygon
+calculates and applies a lighting multiplier to a polygon based on the angle and distance to the light source, as well as the half vector
+purpose is to add lighting to a polygon and adjust the color accordingly so that the polygons don't all blend together
+Author: Jerry
 */
 
 void polygonLightning(struct Objects& objects, struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
@@ -221,7 +234,8 @@ void polygonLightning(struct Objects& objects, struct Object& object, int polygo
 }
 
 /*
-Function to calculate the color shift of a single polygon
+calculates a color shift for a polygon based on the half vector of the light source and camera position
+purpose is the give the ice a shiny light scattering effect
 */
 
 void polygonRefraction(struct Object& object, int polygon, std::array<float,3> lightSource, std::array<float,3> cameraPosition) {
@@ -262,7 +276,9 @@ void polygonRefraction(struct Object& object, int polygon, std::array<float,3> l
 }
 
 /*
-Function to calculate the lighting/color of every polygon
+separate objects and creates threads for each, to apply the lighting to each in parallel
+purpose is the apply the lighting system to all objects in a single function
+Author: Jerry
 */
 
 void handleLighting(struct Objects& objects) {
@@ -339,6 +355,10 @@ void handleLighting(struct Objects& objects) {
     }
 }
 
+/*
+function was broken and ultimately scraped for the time being, currently used to filter out polygons that are completely hidden
+Author: Jerry
+*/
 void clipPolygon(Objects& objects, Object& object, int polygon) {
     std::vector<std::array<float,3>> verts = {object.vertices[object.faces[polygon][0]], object.vertices[object.faces[polygon][1]], object.vertices[object.faces[polygon][2]]};
 
@@ -427,6 +447,10 @@ void clipPolygon(Objects& objects, Object& object, int polygon) {
     }
 }
 
+/*
+polygon clipping was ultimatedly cut, so this function is currently an overcomplicated way of filtering hidden polygons for all objects
+Author: Jerry
+*/
 void clipAll(Container& container) {
     for (int i = 0; i < container.objects.platforms.size(); i++) {
         container.objects.platforms[i].tempVertices.clear();
@@ -515,7 +539,9 @@ void clipAll(Container& container) {
 }
 
 /*
-Function to project a single 3d vertex into 2d
+projects a vertex from 3d space to 2d coordinates
+purpose is to aid in turning 3d objects into drawable 2d coordinates
+Author: Jerry
 */
 
 void project(const struct Objects& objects, const std::vector<std::array<float,3>>& vertices, struct Screen& screen, int vertex) {
@@ -536,7 +562,8 @@ void project(const struct Objects& objects, const std::vector<std::array<float,3
 }
 
 /*
-Function to project a single effect vertex from 3d to 2d
+almost the exact same as the previous function, except used for projecting and organizing the particle effects
+Author: Jerry
 */
 
 void projectEffects(const struct Objects& objects, const std::vector<std::array<float,3>>& vertices, struct Screen& screen, int vertex) {
@@ -560,7 +587,9 @@ void projectEffects(const struct Objects& objects, const std::vector<std::array<
 }
 
 /*
-Function to project every vertex from 3d to 2d
+projects all objects from 3d to 2d in separate threads to run them in parallel so it isn't as slow
+purpose is to convert all objects to 2d data that can be drawn on the screen
+Author: Jerry
 */
 
 void projectAll(Container& container) {
@@ -689,7 +718,9 @@ void projectAll(Container& container) {
 }
 
 /*
-Function to color a single polygon
+iterates through a box of pixels containing a polygon and checks if the pixel is inside the polygon, drawing it if it is and if the calculated depth is less than the previously stored depth at the pixel
+purpose is to use the data provided by the projection step to determine the color of a group of pixels
+Author: Jerry
 */
 
 void colorPolygon(struct Screen& screen, int polygon) {
@@ -729,7 +760,8 @@ void colorPolygon(struct Screen& screen, int polygon) {
 }
 
 /*
-Function to color a snow flake
+the same function as above, but for coloring the snow particles. does not have z buffering as the snow particles are translucent
+Author: Jerry
 */
 
 void colorSnow(struct Screen& screen, int snow) {
@@ -761,7 +793,9 @@ void colorSnow(struct Screen& screen, int snow) {
 }
 
 /*
-Function to color the screen
+iterates through every polygon and creates a 2d array of every pixel color on the screen
+purpose is to convert the data from the projection step into usable information that can be directly drawn on the screen
+Author: Jerry
 */
 
 void colorAll(Container& container) {
@@ -781,7 +815,9 @@ void colorAll(Container& container) {
 }
 
 /*
-Function to find horizontal line segments
+iterates through the 2d pixel array to identify contiguous horizontal lines of the same color, provided that the pixel color has changed from the previous frame
+purpose is to turn the pixel array into data that can be put directly into a draw line function, as draw line is much faster than draw pixel
+Author: Jerry
 */
 
 void findLines(Container& container) {
@@ -819,7 +855,9 @@ void findLines(Container& container) {
 }
 
 /*
-Function to draw all lines on the screen
+iterates through the lines of pixels and draws each line
+purpose is the draw the current frame on the screen
+Author: Jerry
 */
 
 void drawScreen(Container& container) {
@@ -829,6 +867,11 @@ void drawScreen(Container& container) {
     }
 }
 
+/*
+shows the fps in the corner of the screen
+purpose is to aid in optimization and provide performance info to the user
+Author: Jerry
+*/
 void showOverlay(Container& container) {
     LCD.SetFontColor(GRAY);
     LCD.FillRectangle(255,5,55,24);
@@ -845,6 +888,8 @@ void showOverlay(Container& container) {
 
 /*
 Master rendering function, finally
+calls all previous functions and stores them in a single function that can be called in the game loop
+Author: Jerry
 */
 
 void render(Container& container) {

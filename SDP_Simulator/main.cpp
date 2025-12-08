@@ -4,12 +4,16 @@
 #include "header_files/menu.h"
 #include "header_files/sounds.h"
 
+/*
+Main loop.
+Creates all the sound objects and pushes them to the data container, then runs the menu screen loop.
+*/
 int main()
 {
     freopen("/dev/null","w",stdout);
 
     Container* container = new Container();
-    FEHSound menuMusic((*container).files.soundFiles.menuMusic); // make sure you know the index of each sound file
+    FEHSound menuMusic((*container).files.soundFiles.menuMusic);
     (*container).files.music.push_back(menuMusic);
     FEHSound cutsceneMusic((*container).files.soundFiles.cutsceneMusic);
     (*container).files.music.push_back(cutsceneMusic);

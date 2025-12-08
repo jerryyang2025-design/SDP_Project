@@ -14,6 +14,10 @@
 
 class Container;
 
+/*
+represents each individual object/platform in the game and its properties
+Author: Jerry
+*/
 struct Object {
     std::vector<std::array<float,3>> vertices, tempVertices;
     std::vector<std::array<int,3>> faces, faceColors, hitbox, tempFaces, tempFaceColors;
@@ -22,6 +26,10 @@ struct Object {
     float refractionValue;
 };
 
+/*
+holds all loaded objects in the 3d environment as well as a few default objects that do not fit into the struct
+Author: Jerry
+*/
 struct Objects {
     std::array<std::array<float,3>,9> playerHitbox;
     std::vector<std::array<float,3>> snow;
@@ -31,11 +39,19 @@ struct Objects {
     std::vector<struct Object> platforms, movingPlatforms, water;
 };
 
+/*
+struct containing the coordinates and color of a horizontal line of pixels
+Author: Jerry
+*/
 struct line {
     int y, x1 = -1, x2;
     unsigned color; // color converted to hexadecimal
 };
 
+/*
+struct that holds all information related to the screen and information needed to correctly render the frame
+Author: Jerry
+*/
 struct Screen {
     std::vector<std::array<float,4>> vertices = {}; // stored as a float to keep accurate depth value (not z, find projection with cameraVector), and in or out of view
     std::vector<std::array<float,3>> effects;
@@ -73,6 +89,10 @@ struct MusicStates {
     float startTime;
 };
 
+/*
+struct to store all global game states
+Author: Jerry
+*/
 struct States {
     struct PlayerStates playerStates;
     struct GameStates gameStates;
@@ -81,6 +101,10 @@ struct States {
     int currentStage = 0;
 };
 
+/*
+struct to store information necessary for camera rotation
+Author: Nigel
+*/
 struct Rotation {
     std::array<float,2> previousMouse, currentMouse;
     float xzRotation=0, yzRotation=0, total_yzRotation=0;
@@ -116,6 +140,11 @@ struct SoundFiles {
     char click[38] = "sounds/mixkit-select-click-1109.wav"; // https://mixkit.co/free-sound-effects/whoosh/
 };
 
+/*
+stores all the files needed for each stage, along with metadata for each file and stage to allow easy editing of stage designs
+includes functions to load a .obj file and each file in a stage, while resetting necessary data between stages
+Author: Jerry & Nigel
+*/
 class Files {
     private:
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
@@ -166,6 +195,10 @@ class Files {
         Files();
 };
 
+/*
+public container class to hold all data so that information is easily accessible in each function
+Author: Jerry
+*/
 class Container {
     public:
         struct Objects objects; // will add more once the rest are in

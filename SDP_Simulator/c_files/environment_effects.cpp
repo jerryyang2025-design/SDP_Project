@@ -13,6 +13,11 @@ float waveMovement(std::array<float,3> vertex, long frames) {
     return WAVEHEIGHT * wave1 ; // maybe adjust depending on framerate, or change to use time
 }
 
+/*
+iterates through every wave vertex and adjust the heights using a sin function
+purpose is to animate the water with a subtle wave effect
+Author: Jerry
+*/
 void handleWaves(Container& container) {
     for (int i = 0; i < container.objects.water.size(); i++) {
         for (int j = 0; j < container.objects.water[i].vertices.size(); j++) {
@@ -21,6 +26,11 @@ void handleWaves(Container& container) {
     }
 }
 
+/*
+Randomly create snow around the map
+purpose is the add atmosphere
+Author: Jerry
+*/
 void createSnow(Container& container) { // adjust accordingly
     int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 100 + 100,100,200);
     for (int i = 0; i < amountOfSnow; i++) {
@@ -39,12 +49,22 @@ float snowFalling(std::array<float,3> vertex) {
     }
 }
 
+/*
+Iterates through every snow particle vertex and moves them down, sending them back to the top when they reach the bottom
+purpose is to animate the snow
+Author: Jerry
+*/
 void handleSnow(Container& container) {
     for (int i = 0; i < container.objects.snow.size(); i++) {
         container.objects.snow[i][1] = snowFalling(container.objects.snow[i]);
     }
 }
 
+/*
+central function to handle all animations
+purpose is to group related functions so that game loop can call them all at once
+Author: Jerry
+*/
 void handleEnvironmentAnimations(Container& container) {
     handleWaves(container);
     handleSnow(container);
@@ -53,3 +73,5 @@ void handleEnvironmentAnimations(Container& container) {
 // scraped for now, might add in the future as a personal project:
 // add platform moving function, don't forget to move hitbox too
 // have a temporary velocity for the platforms, add it to player temp velocity if collision detected
+
+// a lot of code in the other files are commented out, that just means it was scraped for now, but I still want to keep it
