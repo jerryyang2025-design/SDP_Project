@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include "data.h"
 
 float clamp(float value, float min, float max);
 
@@ -46,7 +47,7 @@ std::vector<std::string> split(const std::string& s, char delim);
 
 std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, float scale);
 
-int manageFPS(int time);
+int manageFPS(Container& container, int time);
 
 std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi);
 

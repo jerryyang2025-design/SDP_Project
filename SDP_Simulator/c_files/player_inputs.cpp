@@ -15,25 +15,28 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
     container.states.playerStates.tempVelocity = {};
 
     std::array<float,3> tempCamera=container.objects.cameraVector,tempRightCamera=container.objects.cameraRightVector;
+    tempCamera[1] = 0;
     normalize(tempCamera);
     normalize(tempRightCamera);
 
+    float fpsAdjuster = FPS / clamp(container.states.gameStates.fps,1,30);
+
     if (Keyboard.isPressed(KEY_W)) {
         //container.states.playerStates.tempVelocity[2] = USERSPEED;
-        container.states.playerStates.tempVelocity[2] = USERSPEED*tempCamera[2];
-        container.states.playerStates.tempVelocity[0] = USERSPEED*tempCamera[0];
+        container.states.playerStates.tempVelocity[2] = fpsAdjuster*USERSPEED*tempCamera[2];
+        container.states.playerStates.tempVelocity[0] = fpsAdjuster*USERSPEED*tempCamera[0];
     }
     if (Keyboard.isPressed(KEY_A)) {
-        container.states.playerStates.tempVelocity[0] = -USERSPEED*tempRightCamera[0];
-        container.states.playerStates.tempVelocity[2] = -USERSPEED*tempRightCamera[2];
+        container.states.playerStates.tempVelocity[0] = -fpsAdjuster*USERSPEED*tempRightCamera[0];
+        container.states.playerStates.tempVelocity[2] = -fpsAdjuster*USERSPEED*tempRightCamera[2];
     }
     if (Keyboard.isPressed(KEY_S)) {
-        container.states.playerStates.tempVelocity[2] = -USERSPEED*tempCamera[2];
-        container.states.playerStates.tempVelocity[0] = -USERSPEED*tempCamera[0];
+        container.states.playerStates.tempVelocity[2] = -fpsAdjuster*USERSPEED*tempCamera[2];
+        container.states.playerStates.tempVelocity[0] = -fpsAdjuster*USERSPEED*tempCamera[0];
     }
     if (Keyboard.isPressed(KEY_D)) {
-        container.states.playerStates.tempVelocity[0] = USERSPEED*tempRightCamera[0];
-        container.states.playerStates.tempVelocity[2] = USERSPEED*tempRightCamera[2];
+        container.states.playerStates.tempVelocity[0] = fpsAdjuster*USERSPEED*tempRightCamera[0];
+        container.states.playerStates.tempVelocity[2] = fpsAdjuster*USERSPEED*tempRightCamera[2];
     }
     if (Keyboard.isPressed(KEY_SPACE)) {
         if (container.states.playerStates.onGround[0]) {
@@ -71,7 +74,7 @@ void cameraRotation(Container& container) { // Rotates camera based on angle rot
         tempCamera[1] += container.rotation.xzRotation;
         tempRightCamera[1] += container.rotation.xzRotation;
 
-        tempCamera[2] = clamp(tempCamera[2] + container.rotation.yzRotation,-PI/2,PI/2);
+        tempCamera[2] = clamp(tempCamera[2] + container.rotation.yzRotation,-85 * PI/180,85 * PI/180);
 
         container.objects.cameraVector = sphericalToCartesian(tempCamera);
         container.objects.cameraRightVector = sphericalToCartesian(tempRightCamera);

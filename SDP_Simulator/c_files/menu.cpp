@@ -734,7 +734,7 @@ void runGame(Container& container) {
 
         auto end = std::chrono::steady_clock::now();
         container.states.gameStates.timeBetweenFrames = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-        manageFPS(container.states.gameStates.timeBetweenFrames);
+        manageFPS(container, container.states.gameStates.timeBetweenFrames);
         container.states.gameStates.frames++;
     }
     stopGameMusic(container);

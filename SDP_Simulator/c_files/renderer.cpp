@@ -133,11 +133,16 @@ DWORD WINAPI projectWorker(LPVOID lpParameter) {
             int f1 = obj.tempFaces[j][1] + vertexBase;
             int f2 = obj.tempFaces[j][2] + vertexBase;
 
-            if (!((*task).projectedVertices[f0][3] > 0.5 || (*task).projectedVertices[f1][3] > 0.5 || (*task).projectedVertices[f2][3] > 0.5)) {
+            if ((*task).projectedVertices[f0][3] < 0.5 || (*task).projectedVertices[f1][3] < 0.5 || (*task).projectedVertices[f2][3] < 0.5) {
                 std::array<int,3> face = {f0,f1,f2};
                 (*task).projectedFaces.push_back(face);
                 (*task).projectedFaceColors.push_back(obj.tempFaceColors[j]);
             }
+            // if (!((*task).projectedVertices[f0][3] > 0.5 || (*task).projectedVertices[f1][3] > 0.5 || (*task).projectedVertices[f2][3] > 0.5)) {
+            //     std::array<int,3> face = {f0,f1,f2};
+            //     (*task).projectedFaces.push_back(face);
+            //     (*task).projectedFaceColors.push_back(obj.tempFaceColors[j]);
+            // }
         }
     }
 
@@ -345,7 +350,22 @@ void clipPolygon(Objects& objects, Object& object, int polygon) {
 
         float aspect = (float)SCREEN_X / (float)SCREEN_Y;
 
-        bool hidden = (z < NEAR_PLANE || x < -z * aspect || x > z * aspect || y < -z || y > z);
+        bool hidden = (z < NEAR_PLANE);
+
+        if (!hidden) {
+            float projectedX;
+            projectedX = x * (SCREEN_Y / 2) / z;
+            if (fabs(projectedX) > (SCREEN_X / 2)) {
+                hidden = true;
+            }
+        }
+        if (!hidden) {
+            float projectedY;
+            projectedY = y * (SCREEN_Y / 2) / z;
+            if (fabs(projectedY) > (SCREEN_Y / 2)) {
+                hidden = true;
+            }
+        }
 
         if (!hidden) {
             insideIndices[insideCount++] = i;
@@ -356,7 +376,7 @@ void clipPolygon(Objects& objects, Object& object, int polygon) {
 
     if (insideCount == 0) {
         return;
-    } else if (insideCount == 3) {
+    } else { // if (insideCount == 3) {
         int baseIndex = object.tempVertices.size();
         for (int i = 0; i < 3; i++) {
             object.tempVertices.push_back(verts[i]);
@@ -396,13 +416,11 @@ void clipPolygon(Objects& objects, Object& object, int polygon) {
         object.tempVertices.push_back(verts[i0]);
         object.tempVertices.push_back(verts[i1]);
         object.tempVertices.push_back(newV[0]);
+        object.tempVertices.push_back(newV[1]);
         object.tempFaces.push_back({baseIndex, baseIndex+1, baseIndex+2});
         object.tempFaceColors.push_back(object.faceColors[polygon]);
 
-        object.tempVertices.push_back(verts[i1]);
-        object.tempVertices.push_back(newV[1]);
-        object.tempVertices.push_back(newV[0]);
-        object.tempFaces.push_back({baseIndex+3, baseIndex+4, baseIndex+5});
+        object.tempFaces.push_back({baseIndex+1, baseIndex+3, baseIndex+2});
         object.tempFaceColors.push_back(object.faceColors[polygon]);
     }
 }
@@ -413,14 +431,12 @@ void clipAll(Container& container) {
         container.objects.platforms[i].tempFaces.clear();
         container.objects.platforms[i].tempFaceColors.clear();
     }
-    for (int i = 0; i < container.objects.movingPlatforms.size(); i++) {
-        container.objects.movingPlatforms[i].tempVertices.clear();
-        container.objects.movingPlatforms[i].tempFaces.clear();
-        container.objects.movingPlatforms[i].tempFaceColors.clear();
-    }
     container.objects.end.tempVertices.clear();
     container.objects.end.tempFaces.clear();
     container.objects.end.tempFaceColors.clear();
+    container.objects.water.tempVertices.clear();
+    container.objects.water.tempFaces.clear();
+    container.objects.water.tempFaceColors.clear();
 
     const int numThreads = 16;
 
@@ -489,7 +505,7 @@ void project(const struct Objects& objects, const std::vector<std::array<float,3
     std::array<float,2> yResults = fieldOfViewBoundUp(objects,vertices[vertex]);
 
     float hidden = 0;
-    if (depthResults[1] > 0.5 || xResults[1] > 0.5 || yResults[1] > 0.5) {
+    if (depthResults[1] > 0.5) { // || xResults[1] > 0.5 || yResults[1] > 0.5) {
         hidden = 1;
     }
     int x = round(xResults[0] + SCREEN_X / 2);
@@ -585,7 +601,7 @@ void projectAll(Container& container) {
         project(container.objects, container.objects.end.tempVertices, container.screen, j);
     }
     for (int j = 0; j < container.objects.end.tempFaces.size(); j++) {
-        if (!(container.screen.vertices[container.objects.end.tempFaces[j][0] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + endBase][3] > 0.5)) {
+        if (container.screen.vertices[container.objects.end.tempFaces[j][0] + endBase][3] < 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + endBase][3] < 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + endBase][3] < 0.5) {
             std::array<int,3> face = container.objects.end.tempFaces[j];
             for (int k = 0; k < 3; k++) {
                 face[k] += endBase;
@@ -593,6 +609,14 @@ void projectAll(Container& container) {
             container.screen.faces.push_back(face);
             container.screen.faceColors.push_back(container.objects.end.tempFaceColors[j]);
         }
+        // if (!(container.screen.vertices[container.objects.end.tempFaces[j][0] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][1] + endBase][3] > 0.5 || container.screen.vertices[container.objects.end.tempFaces[j][2] + endBase][3] > 0.5)) {
+        //     std::array<int,3> face = container.objects.end.tempFaces[j];
+        //     for (int k = 0; k < 3; k++) {
+        //         face[k] += endBase;
+        //     }
+        //     container.screen.faces.push_back(face);
+        //     container.screen.faceColors.push_back(container.objects.end.tempFaceColors[j]);
+        // }
     }
 
     int waterBase = container.screen.vertices.size();
@@ -600,7 +624,7 @@ void projectAll(Container& container) {
         project(container.objects, container.objects.water.tempVertices, container.screen, j);
     }
     for (int j = 0; j < container.objects.water.tempFaces.size(); j++) {
-        if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] > 0.5)) {
+        if (container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] < 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] < 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] < 0.5) {
             std::array<int,3> face = container.objects.water.tempFaces[j];
             for (int k = 0; k < 3; k++) {
                 face[k] += waterBase;
@@ -608,6 +632,14 @@ void projectAll(Container& container) {
             container.screen.faces.push_back(face);
             container.screen.faceColors.push_back(container.objects.water.tempFaceColors[j]);
         }
+        // if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] > 0.5)) {
+        //     std::array<int,3> face = container.objects.water.tempFaces[j];
+        //     for (int k = 0; k < 3; k++) {
+        //         face[k] += waterBase;
+        //     }
+        //     container.screen.faces.push_back(face);
+        //     container.screen.faceColors.push_back(container.objects.water.tempFaceColors[j]);
+        // }
     }
 
     for (int j = 0; j < container.objects.snow.size(); j++) {
@@ -777,6 +809,20 @@ void drawScreen(Container& container) {
     }
 }
 
+void showOverlay(Container& container) {
+    LCD.SetFontColor(GRAY);
+    LCD.FillRectangle(255,5,55,24);
+    LCD.SetFontColor(DARKGRAY);
+    LCD.FillRectangle(257,7,51,20);
+    LCD.SetFontColor(MIDNIGHTBLUE);
+    LCD.SetFontScale(0.5);
+    LCD.WriteAt("FPS:",260,10);
+    LCD.WriteAt(container.states.gameStates.fps,290,10);
+
+    // LCD.SetFontColor(BLACK);
+    // LCD.FillRectangle(0,SCREEN_Y - 40,SCREEN_X,40);
+}
+
 /*
 Master rendering function, finally
 */
@@ -788,5 +834,6 @@ void render(Container& container) {
     colorAll(container);
     findLines(container);
     drawScreen(container);
+    showOverlay(container);
     LCD.Update();
 }

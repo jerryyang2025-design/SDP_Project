@@ -8,7 +8,7 @@
 #define SCREEN_X 320
 #define SCREEN_Y 240
 #define FPS 30
-#define PLAYER_HEIGHT 100
+#define PLAYER_HEIGHT 200
 #define NUMBEROFFILES 4
 #define NUMBEROFSTAGES 3
 
@@ -65,6 +65,7 @@ struct GameStates {
     bool pause = false;
     bool hoverOnButton = false;
     int timeBetweenFrames = 0; // in milliseconds
+    int fps = 0;
 };
 
 struct MusicStates {
@@ -120,7 +121,8 @@ class Files {
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
         std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
         std::vector<std::string> stageOne = {"obj_files/1_water_0_2.obj",
-            "obj_files/1_floe_0_1.obj",
+            "obj_files/1_floe_0_0.obj",
+            "obj_files/1_floe_1_1.obj",
             "obj_files/1_end_0_3.obj"};
     public:
         struct Art art;

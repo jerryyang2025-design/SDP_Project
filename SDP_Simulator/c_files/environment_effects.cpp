@@ -9,7 +9,7 @@
 #define ENVIRONMENT_WIDTH 10000
 
 float waveMovement(std::array<float,3> vertex, long frames) {
-    float wave1 = sin(frames * 0.02 + (vertex[0] - vertex[2]) * 5.0f);
+    float wave1 = sin(frames * 0.04 + (vertex[0] - vertex[2]) / 5.0f);
     return WAVEHEIGHT * wave1 ; // maybe adjust depending on framerate, or change to use time
 }
 
@@ -20,7 +20,7 @@ void handleWaves(Container& container) {
 }
 
 void createSnow(Container& container) { // adjust accordingly
-    int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 200 + 200,200,400);
+    int amountOfSnow = clamp((Random.RandInt() / 32767.0f) * 100 + 100,100,200);
     for (int i = 0; i < amountOfSnow; i++) {
         float height = clamp((Random.RandInt() / 32767.0f) * SNOWHEIGHT + 200,200,5200);
         float x = clamp((Random.RandInt() / 32767.0f) * ENVIRONMENT_WIDTH - ENVIRONMENT_WIDTH / 2,-ENVIRONMENT_WIDTH / 2,ENVIRONMENT_WIDTH / 2);

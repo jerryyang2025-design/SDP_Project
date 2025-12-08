@@ -6,20 +6,23 @@
 
 #define ICECOLOR {230, 230, 240}
 #define WATERCOLOR {190, 215, 250}
-#define ICEREFLECTION 1
-#define WATERREFLECTION 0.5
+#define ICEREFLECTION 1.3
+#define WATERREFLECTION 0.8
 #define ICEREFRACTION 15
 #define WATERREFRACTION 5
 #define STARTING_HEIGHT 500
 
 Files::Files() { // edit the location and size of each object/stage
-    fileMetaData[1].center = {0, 0, 0};
+    fileMetaData[0].center = {0, 0, 0};
+    fileMetaData[0].size = 150;
+    fileMetaData[0].height = 100;
+    fileMetaData[1].center = {0, 0, 500};
     fileMetaData[1].size = 150;
     fileMetaData[1].height = 100;
     fileMetaData[2].center = {0, 0, 0};
-    fileMetaData[2].size = 1000;
+    fileMetaData[2].size = 2000;
     fileMetaData[2].height = 0;
-    fileMetaData[3].center = {0, 0, 400};
+    fileMetaData[3].center = {0, 0, 1000};
     fileMetaData[3].size = 150;
     fileMetaData[3].height = 100;
 

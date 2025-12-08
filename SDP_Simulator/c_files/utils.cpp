@@ -194,9 +194,10 @@ std::array<std::array<float,3>,9> generateHitbox(std::array<float,3> center, flo
     return temp;
 }
 
-int manageFPS(int time) {
+int manageFPS(Container& container, int time) {
     float desiredTime = 1000.0 / FPS;
     int sleepTime = clamp(round(desiredTime - time),0,1000);
+    container.states.gameStates.fps = 1000 / (sleepTime + time);
     return sleepTime;
 } // probably unnecessary, needs testing to be sure
 
