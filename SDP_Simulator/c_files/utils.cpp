@@ -203,7 +203,7 @@ int manageFPS(Container& container, int time) {
     int sleepTime = clamp(round(desiredTime - time),0,1000);
     container.states.gameStates.fps = 1000 / (sleepTime + time);
     return sleepTime;
-} // probably unnecessary, needs testing to be sure
+}
 
 /*Takes an array of spherical coords an returns an array in cartesian. Author: Nigel*/
 std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi) {
@@ -236,6 +236,9 @@ void toCameraSpace(const Objects& objects, const std::array<float,3>& v, float& 
     z = depth(objects, v)[0];
 }
 
+/*
+currently unused since clipping was cut from the project
+*/
 std::array<float,3> interpolateVertex(const std::array<float,3>& vInside, const std::array<float,3>& vOutside, const Objects& objects) {
     float xIn, yIn, zIn;
     float xOut, yOut, zOut;
