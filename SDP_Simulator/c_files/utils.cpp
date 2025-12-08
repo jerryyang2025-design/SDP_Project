@@ -1,3 +1,7 @@
+/*
+    File contains all utility functions. Utility functions perform a calculation that can used within any other function.
+*/
+
 #include <math.h>
 #include <sstream>
 #include "header_files/utils.h"
@@ -201,6 +205,7 @@ int manageFPS(Container& container, int time) {
     return sleepTime;
 } // probably unnecessary, needs testing to be sure
 
+/*Takes an array of spherical coords an returns an array in cartesian. Author: Nigel*/
 std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi) {
     std::array<float,3> xyz; // {x, y, z}
     xyz[0] = rThetaPhi[0] * cos(rThetaPhi[2]) * sin(rThetaPhi[1]);
@@ -208,7 +213,7 @@ std::array<float,3> sphericalToCartesian(const std::array<float,3>& rThetaPhi) {
     xyz[2] = rThetaPhi[0] * cos(rThetaPhi[2]) * cos(rThetaPhi[1]);
     return xyz;
 }
-
+/*Takes an array of cartesian coordinates and returns an array in spherical. Author: Nigel*/
 std::array<float,3> cartesianToSpherical(const std::array<float,3>& xyz) {
     // converts an array of cartesian coords to spherical coords in radians.
     std::array<float,3> rThetaPhi; // {r, theta, phi}
