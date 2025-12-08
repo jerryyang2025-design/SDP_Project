@@ -707,7 +707,7 @@ Author: Nigel*/
 void checkGameState(Container& container) {
     if (container.states.playerStates.onGround[0]) {
         if (container.states.playerStates.onGround[1] == 3) {
-            float x = container.states.gameStates.frames;
+            float x = container.states.gameStates.totalTime / 15.0f;
             container.states.stagePoints[container.states.currentStage - 1] = clamp(-(x + 1000) / 2 + 6000 + 10000000000 / (2222 * (x + 1000)),1000,10000);
             stopGameMusic(container);
             transition(container, 7);

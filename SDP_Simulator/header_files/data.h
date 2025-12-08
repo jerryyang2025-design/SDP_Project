@@ -9,7 +9,7 @@
 #define SCREEN_Y 240
 #define FPS 30
 #define PLAYER_HEIGHT 200
-#define NUMBEROFFILES 30
+#define NUMBEROFFILES 32
 #define NUMBEROFSTAGES 3
 
 class Container;
@@ -82,6 +82,7 @@ struct GameStates {
     bool hoverOnButton = false;
     int timeBetweenFrames = 0; // in milliseconds
     int fps = 0;
+    int totalTime = 0;
 };
 
 struct MusicStates {
@@ -185,6 +186,8 @@ class Files {
             "obj_files/3_floe_6_26.obj",
             "obj_files/3_floe_7_27.obj",
             "obj_files/3_floe_8_28.obj",
+            "obj_files/3_floe_9_29.obj",
+            "obj_files/3_floe_10_30.obj",
             "obj_files/3_end_0_15.obj"};
     public:
         struct Art art;

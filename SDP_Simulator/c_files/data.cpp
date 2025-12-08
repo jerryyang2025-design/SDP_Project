@@ -8,11 +8,12 @@
 #define WATERCOLOR {190, 215, 250}
 #define ICEREFLECTION 1.3
 #define WATERREFLECTION 0.8
-#define ICEREFRACTION 15
-#define WATERREFRACTION 5
+#define ICEREFRACTION 20
+#define WATERREFRACTION 8
 #define STARTING_HEIGHT 500
 
 Files::Files() { // edit the location and size of each object/stage
+    // stage 1
     fileMetaData[0].center = {-800, 0, -1300}; // floe
     fileMetaData[0].size = 150;
     fileMetaData[0].height = 100;
@@ -56,6 +57,90 @@ Files::Files() { // edit the location and size of each object/stage
     fileMetaData[6].center = {-1000, 0, -1000}; // water
     fileMetaData[6].size = 1000;
     fileMetaData[6].height = 0;
+
+    // stage 2
+
+    fileMetaData[14].center = {-1000, 0, 1600}; // end
+    fileMetaData[14].size = 150;
+    fileMetaData[14].height = 100;
+
+    fileMetaData[11].center = {0, 0, -1300}; // floe
+    fileMetaData[11].size = 150;
+    fileMetaData[11].height = 100;
+
+    fileMetaData[12].center = {100, 0, -800}; // floe
+    fileMetaData[12].size = 50;
+    fileMetaData[12].height = 100;
+
+    fileMetaData[13].center = {350, 0, -400}; // floe
+    fileMetaData[13].size = 75;
+    fileMetaData[13].height = 100;
+
+    fileMetaData[16].center = {0, 0, 0}; // floe
+    fileMetaData[16].size = 50;
+    fileMetaData[16].height = 100;
+
+    fileMetaData[17].center = {-150, 0, 425}; // floe
+    fileMetaData[17].size = 150;
+    fileMetaData[17].height = 100;
+
+    fileMetaData[18].center = {-300, 0, 850}; // floe
+    fileMetaData[18].size = 65;
+    fileMetaData[18].height = 100;
+
+    fileMetaData[19].center = {-400, 0, 1300}; // floe
+    fileMetaData[19].size = 85;
+    fileMetaData[19].height = 100;
+
+    // stage 3
+
+    fileMetaData[15].center = {1400, 0, 0}; // end
+    fileMetaData[15].size = 150;
+    fileMetaData[15].height = 100;
+
+    fileMetaData[20].center = {-1300, 0, 0}; // floe
+    fileMetaData[20].size = 150;
+    fileMetaData[20].height = 100;
+
+    fileMetaData[21].center = {-750, 0, -50}; // floe
+    fileMetaData[21].size = 50;
+    fileMetaData[21].height = 100;
+
+    fileMetaData[22].center = {-200, 0, 0}; // floe
+    fileMetaData[22].size = 70;
+    fileMetaData[22].height = 100;
+
+    fileMetaData[23].center = {375, 0, 50}; // floe
+    fileMetaData[23].size = 65;
+    fileMetaData[23].height = 100;
+
+    fileMetaData[24].center = {900, 0, 0}; // floe
+    fileMetaData[24].size = 50;
+    fileMetaData[24].height = 100;
+
+    fileMetaData[25].center = {-1000, 0, 500}; // floe
+    fileMetaData[25].size = 150;
+    fileMetaData[25].height = 100;
+
+    fileMetaData[26].center = {-600, 0, 950}; // floe
+    fileMetaData[26].size = 175;
+    fileMetaData[26].height = 100;
+
+    fileMetaData[27].center = {-200, 0, 850}; // floe
+    fileMetaData[27].size = 150;
+    fileMetaData[27].height = 100;
+
+    fileMetaData[28].center = {300, 0, 800}; // floe
+    fileMetaData[28].size = 150;
+    fileMetaData[28].height = 100;
+    
+    fileMetaData[29].center = {800, 0, 750}; // floe
+    fileMetaData[29].size = 150;
+    fileMetaData[29].height = 100;
+
+    fileMetaData[30].center = {1300, 0, 500}; // floe
+    fileMetaData[30].size = 150;
+    fileMetaData[30].height = 100;
 
     // Stage data
     stageMetaData[0].backgroundColor = {150, 190, 230};
@@ -168,6 +253,7 @@ void Files::loadFile(Container& container, const std::string& fileName) {
 
 void resetData(Container& container) { // does not reset end or water, since those will be in every stage and will be overwritten regardless
     container.states.gameStates.frames = 0;
+    container.states.gameStates.totalTime = 0;
     container.states.gameStates.pause = false;
     container.states.playerStates.tempVelocity = {};
     container.states.playerStates.persistentVelocity = {};
@@ -198,19 +284,19 @@ void Files::loadStage(Container& container, int stage) {
         for (int i = 0; i < stageOne.size(); i++) {
             loadFile(container,stageOne[i]);
         }
-    // } else if (stage == 2) {
-    //     container.objects.backgroundColor = stageMetaData[1].backgroundColor;
-    //     container.objects.cameraPosition = stageMetaData[1].camera;
-    //     container.objects.playerHitbox = generateHitbox(stageMetaData[1].camera,50);
-    //     for (int i = 0; i < stageTwo.size(); i++) {
-    //         loadFile(container,stageTwo[i]);
-    //     }
-    // } else if (stage == 3) {
-    //     container.objects.backgroundColor = stageMetaData[2].backgroundColor;
-    //     container.objects.cameraPosition = stageMetaData[2].camera;
-    //     container.objects.playerHitbox = generateHitbox(stageMetaData[2].camera,50);
-    //     for (int i = 0; i < stageThree.size(); i++) {
-    //         loadFile(container,stageThree[i]);
-    //     }
+    } else if (stage == 2) {
+        container.objects.backgroundColor = stageMetaData[1].backgroundColor;
+        container.objects.cameraPosition = stageMetaData[1].camera;
+        container.objects.playerHitbox = generateHitbox(stageMetaData[1].camera,50);
+        for (int i = 0; i < stageTwo.size(); i++) {
+            loadFile(container,stageTwo[i]);
+        }
+    } else if (stage == 3) {
+        container.objects.backgroundColor = stageMetaData[2].backgroundColor;
+        container.objects.cameraPosition = stageMetaData[2].camera;
+        container.objects.playerHitbox = generateHitbox(stageMetaData[2].camera,50);
+        for (int i = 0; i < stageThree.size(); i++) {
+            loadFile(container,stageThree[i]);
+        }
     }
 }
