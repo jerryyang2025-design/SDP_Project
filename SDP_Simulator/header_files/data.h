@@ -114,7 +114,7 @@ struct Rotation {
 struct Art {
     char menu[30] = "art/menu_art.png";
     char cutscene[30] = "art/cutscene_art2.png";
-    char transition[30] = "art/transition.png";
+    char transition[30] = "art/transition.png"; // https://stock.adobe.com/images/adorable-white-polar-bear-waving-cute-and-funny-happy-animal-in-winter-snow-copy-space-background-perfect-for-a-arctic-holiday-greeting-card/952941773
     char win[30] = "art/win.png";
 };
 
