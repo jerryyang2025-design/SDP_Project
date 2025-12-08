@@ -441,7 +441,7 @@ void drawStats(Container& container) {
     LCD.FillRectangle(55,65,210,135);
     LCD.SetFontColor(ROYALBLUE);
     LCD.SetFontScale(1);
-    LCD.WriteAt("Points",105,70);
+    LCD.WriteAt("Points",125,70);
     LCD.WriteAt("Stage 1:",60,100);
     LCD.WriteAt(container.states.stagePoints[0],170,100);
     LCD.WriteAt("Stage 2:",60,130);
@@ -499,10 +499,11 @@ void drawInstructions(Container& container) {
     LCD.SetFontScale(0.5);
     LCD.WriteAt("Use WASD to move",62,90);
     LCD.WriteAt("Press spacebar to jump",62,110);
-    LCD.WriteAt("Click and drag to rotate camera",62,130);
+    //LCD.WriteAt("Click and drag to rotate camera",62,130);
+    LCD.WriteAt("Move mouse to rotate camera",62,130);
     LCD.WriteAt("Press esc to pause",62,150);
     LCD.WriteAt("Jump to avoid water and reach the",62,170);
-    LCD.WriteAt("end to win!",62,180);
+    LCD.WriteAt("flag at the end to win!",62,180);
 }
 
 void instructions(Container& container) {

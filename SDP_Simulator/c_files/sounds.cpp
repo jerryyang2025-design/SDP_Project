@@ -12,8 +12,8 @@ void setVolumes(Container& container) {
     container.files.sfx[0].setVolume(0.9); // ice breaking
     container.files.sfx[1].setVolume(0.6); // win sfx
     container.files.sfx[2].setVolume(0.7); // lose sfx
-    container.files.sfx[2].setVolume(0.15); // transition sfx
-    container.files.sfx[2].setVolume(0.6); // button click sfx
+    container.files.sfx[3].setVolume(0.15); // transition sfx
+    container.files.sfx[4].setVolume(0.6); // button click sfx
 }
 
 void playMenuMusic(Container& container) {
