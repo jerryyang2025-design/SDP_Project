@@ -1,3 +1,8 @@
+/*
+    Draws all menu screens and handles the buttons on screen.
+    Includes the runGame function, which handles the game loop and all the functions the game uses.
+*/
+
 #include <chrono>
 #include <cmath>
 #include "FEHLCD.h"
@@ -20,6 +25,7 @@ void drawInstructions(Container& container);
 void drawCredits(Container& container);
 void drawWin(Container& container);
 
+/*Transition that plays when menu screens are changed*/
 void transition(Container& container, int screen) {
     // for (int i = 0; i <= SCREEN_Y; i = i + 6) {
     //     LCD.SetFontColor(BLACK);
@@ -117,6 +123,7 @@ void transition(Container& container, int screen) {
     }
 }
 
+/*Transition that plays when the game starts*/
 void circleTransition(Container& container) {
     container.files.sfx[3].playFrom(0.4);
     for (int i = 0; i <= 170; i = i + 2) {
@@ -129,6 +136,7 @@ void circleTransition(Container& container) {
     Sleep(1.0);
 }
 
+/*Menu button flashes*/
 void buttonFlash(Container& container, int button) {
     container.files.sfx[4].play();
     if (button == 1) { // menu 1
@@ -694,6 +702,8 @@ void loseScreen(Container& container) {
     }
 }
 
+/*Checks where the player is standing. If end is reached, stop the stage and do win screen, if water is touched, stop and do lose screen.
+Author: Nigel*/
 void checkGameState(Container& container) {
     if (container.states.playerStates.onGround[0]) {
         if (container.states.playerStates.onGround[1] == 3) {
@@ -715,6 +725,10 @@ void checkGameState(Container& container) {
     }
 }
 
+/*
+    Runs the game while not paused. Handles all functions that occur while the game loop is running.
+    Plays the cutscene if not played already.
+*/
 void runGame(Container& container) {
     if (!container.states.gameStates.cutscenePlayed) {
         transition(container, 6);

@@ -1,3 +1,7 @@
+/*
+    Contains the functions that handle the movement and camera rotation based on the player's inputs.
+*/
+
 #include "FEHKeyboard.h"
 #include "FEHLCD.h"
 #include "header_files/data.h"
@@ -11,6 +15,8 @@
 #define SENSITIVITY 0.01
 #define PI 3.141592653589793238462643383
 
+/*Reads player inputs from the keyboard and mouse. Changes velocity vectors based on where the camera is pointed.
+Also finds mouse displacement and returns a camera rotation angle. Author: Nigel*/
 void playerInputs(Container& container) { // Reads in inputs from keyboard and mouse
     container.states.playerStates.tempVelocity = {};
 
@@ -66,6 +72,7 @@ void playerInputs(Container& container) { // Reads in inputs from keyboard and m
 
 }
 
+/*Takes the camera rotation from playerInputs and adds it to the camera vectors. Author: Nigel*/
 void cameraRotation(Container& container) { // Rotates camera based on angle rotated
     if (container.rotation.xzRotation != 0 || container.rotation.yzRotation != 0) {
         std::array<float,3> tempCamera = cartesianToSpherical(container.objects.cameraVector);

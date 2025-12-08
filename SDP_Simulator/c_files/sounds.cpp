@@ -1,3 +1,11 @@
+/*
+    Handles all music that plays throughout the game.
+    Checks to see if music is already playing or not based on what state the game is.
+    Makes a song doesn't start when it's already playing.
+    Song loops work by using the TimeNow function and the length of the song.
+    Author: Nigel
+*/
+
 #include "header_files/data.h"
 #include "header_files/sounds.h"
 #include "FEHSound.h"
