@@ -9,7 +9,7 @@
 #define SCREEN_Y 240
 #define FPS 30
 #define PLAYER_HEIGHT 200
-#define NUMBEROFFILES 4
+#define NUMBEROFFILES 30
 #define NUMBEROFSTAGES 3
 
 class Container;
@@ -27,8 +27,8 @@ struct Objects {
     std::vector<std::array<float,3>> snow;
     std::array<float,3> lightSource = {-10000,10000,-10000}, cameraPosition, cameraVector = {0,0,1}, cameraUpVector = {0,1,0}, cameraRightVector = {1,0,0}, universalUp = {0,1,0}; // play around with the light position
     std::array<int,3> backgroundColor;
-    struct Object end, water; // default water height of 0
-    std::vector<struct Object> platforms, movingPlatforms;
+    struct Object end; // default water height of 0
+    std::vector<struct Object> platforms, movingPlatforms, water;
 };
 
 struct line {
@@ -121,9 +121,42 @@ class Files {
         std::array<struct FileData, NUMBEROFFILES> fileMetaData;
         std::array<struct StageData, NUMBEROFSTAGES> stageMetaData;
         std::vector<std::string> stageOne = {"obj_files/1_water_0_2.obj",
+            "obj_files/1_water_1_4.obj",
+            "obj_files/1_water_2_5.obj",
+            "obj_files/1_water_3_6.obj",
             "obj_files/1_floe_0_0.obj",
             "obj_files/1_floe_1_1.obj",
+            "obj_files/1_floe_2_7.obj",
+            "obj_files/1_floe_3_8.obj",
+            "obj_files/1_floe_4_9.obj",
+            "obj_files/1_floe_5_10.obj",
             "obj_files/1_end_0_3.obj"};
+        std::vector<std::string> stageTwo = {"obj_files/1_water_0_2.obj",
+            "obj_files/1_water_1_4.obj",
+            "obj_files/1_water_2_5.obj",
+            "obj_files/1_water_3_6.obj",
+            "obj_files/2_floe_0_11.obj",
+            "obj_files/2_floe_1_12.obj",
+            "obj_files/2_floe_2_13.obj",
+            "obj_files/2_floe_3_16.obj",
+            "obj_files/2_floe_4_17.obj",
+            "obj_files/2_floe_5_18.obj",
+            "obj_files/2_floe_6_19.obj",
+            "obj_files/2_end_0_14.obj"};
+        std::vector<std::string> stageThree = {"obj_files/1_water_0_2.obj",
+            "obj_files/1_water_1_4.obj",
+            "obj_files/1_water_2_5.obj",
+            "obj_files/1_water_3_6.obj",
+            "obj_files/3_floe_0_20.obj",
+            "obj_files/3_floe_1_21.obj",
+            "obj_files/3_floe_2_22.obj",
+            "obj_files/3_floe_3_23.obj",
+            "obj_files/3_floe_4_24.obj",
+            "obj_files/3_floe_5_25.obj",
+            "obj_files/3_floe_6_26.obj",
+            "obj_files/3_floe_7_27.obj",
+            "obj_files/3_floe_8_28.obj",
+            "obj_files/3_end_0_15.obj"};
     public:
         struct Art art;
         struct SoundFiles soundFiles;

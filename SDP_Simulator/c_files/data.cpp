@@ -13,21 +13,59 @@
 #define STARTING_HEIGHT 500
 
 Files::Files() { // edit the location and size of each object/stage
-    fileMetaData[0].center = {0, 0, 0};
+    fileMetaData[0].center = {-800, 0, -1300}; // floe
     fileMetaData[0].size = 150;
     fileMetaData[0].height = 100;
-    fileMetaData[1].center = {0, 0, 500};
+
+    fileMetaData[1].center = {-700, 0, -850}; // floe
     fileMetaData[1].size = 150;
     fileMetaData[1].height = 100;
-    fileMetaData[2].center = {0, 0, 0};
-    fileMetaData[2].size = 2000;
+
+    fileMetaData[7].center = {-800, 0, -200}; // floe
+    fileMetaData[7].size = 150;
+    fileMetaData[7].height = 100;
+
+    fileMetaData[8].center = {-300, 0, 0}; // floe
+    fileMetaData[8].size = 150;
+    fileMetaData[8].height = 100;
+
+    fileMetaData[9].center = {150, 0, 100}; // floe
+    fileMetaData[9].size = 150;
+    fileMetaData[9].height = 100;
+
+    fileMetaData[10].center = {700, 0, 400}; // floe
+    fileMetaData[10].size = 150;
+    fileMetaData[10].height = 100;
+
+    fileMetaData[2].center = {1000, 0, 1000}; // water
+    fileMetaData[2].size = 1000;
     fileMetaData[2].height = 0;
-    fileMetaData[3].center = {0, 0, 1000};
+
+    fileMetaData[3].center = {800, 0, -150}; // end
     fileMetaData[3].size = 150;
     fileMetaData[3].height = 100;
 
+    fileMetaData[4].center = {-1000, 0, 1000}; // water
+    fileMetaData[4].size = 1000;
+    fileMetaData[4].height = 0;
+
+    fileMetaData[5].center = {1000, 0, -1000}; // water
+    fileMetaData[5].size = 1000;
+    fileMetaData[5].height = 0;
+
+    fileMetaData[6].center = {-1000, 0, -1000}; // water
+    fileMetaData[6].size = 1000;
+    fileMetaData[6].height = 0;
+
+    // Stage data
     stageMetaData[0].backgroundColor = {150, 190, 230};
-    stageMetaData[0].camera = {0, PLAYER_HEIGHT + STARTING_HEIGHT, 0};
+    stageMetaData[0].camera = {fileMetaData[0].center[0], PLAYER_HEIGHT + STARTING_HEIGHT, fileMetaData[0].center[2]};
+
+    stageMetaData[1].backgroundColor = {150, 190, 230};
+    stageMetaData[1].camera = {fileMetaData[11].center[0], PLAYER_HEIGHT + STARTING_HEIGHT, fileMetaData[11].center[2]};
+
+    stageMetaData[2].backgroundColor = {150, 190, 230};
+    stageMetaData[2].camera = {fileMetaData[20].center[0], PLAYER_HEIGHT + STARTING_HEIGHT, fileMetaData[20].center[2]};
 }
 
 void Files::loadFile(Container& container, const std::string& fileName) {
@@ -50,6 +88,7 @@ void Files::loadFile(Container& container, const std::string& fileName) {
         container.objects.platforms[index].reflectionValue = ICEREFLECTION;
         container.objects.platforms[index].refractionValue = ICEREFRACTION;
         container.objects.platforms[index].center = fileMetaData[fileID].center;
+        printf("test");
     } else if (objectType[1] == "move") {
         type = 2;
         struct Object platform;
@@ -70,14 +109,16 @@ void Files::loadFile(Container& container, const std::string& fileName) {
         container.objects.end.center = fileMetaData[fileID].center;
     } else if (objectType[1] == "water") {
         type = 4;
-        container.objects.water.vertices.clear();
-        container.objects.water.faces.clear();
-        container.objects.water.faceColors.clear();
-        container.objects.water.hitbox.clear();
-        container.objects.water.color = WATERCOLOR;
-        container.objects.water.reflectionValue = WATERREFLECTION;
-        container.objects.water.refractionValue = WATERREFRACTION;
-        container.objects.water.center = fileMetaData[fileID].center;
+        struct Object platform;
+        container.objects.water.push_back(platform);
+        container.objects.water[index].vertices.clear();
+        container.objects.water[index].faces.clear();
+        container.objects.water[index].faceColors.clear();
+        container.objects.water[index].hitbox.clear();
+        container.objects.water[index].color = WATERCOLOR;
+        container.objects.water[index].reflectionValue = WATERREFLECTION;
+        container.objects.water[index].refractionValue = WATERREFRACTION;
+        container.objects.water[index].center = fileMetaData[fileID].center;
     }
 
     std::string line;
@@ -95,7 +136,7 @@ void Files::loadFile(Container& container, const std::string& fileName) {
             } else if (type == 3) {
                 container.objects.end.vertices.push_back(vertex);
             } else if (type == 4) {
-                container.objects.water.vertices.push_back(vertex);
+                container.objects.water[index].vertices.push_back(vertex);
             }
         }
         if (testline[0] == "f") {
@@ -116,8 +157,8 @@ void Files::loadFile(Container& container, const std::string& fileName) {
                 container.objects.end.hitbox.push_back(face);
                 container.objects.end.faceColors.push_back(ICECOLOR);
             } else if (type == 4) {
-                container.objects.water.faces.push_back(face);
-                container.objects.water.faceColors.push_back(WATERCOLOR);
+                container.objects.water[index].faces.push_back(face);
+                container.objects.water[index].faceColors.push_back(WATERCOLOR);
             }
         }
     }
@@ -135,6 +176,7 @@ void resetData(Container& container) { // does not reset end or water, since tho
     container.objects.cameraRightVector = {1,0,0};
     container.objects.snow.clear();
     container.objects.platforms.clear();
+    container.objects.water.clear();
     container.objects.movingPlatforms.clear();
     container.rotation.currentMouse = {};
     container.rotation.previousMouse = {};
@@ -156,9 +198,19 @@ void Files::loadStage(Container& container, int stage) {
         for (int i = 0; i < stageOne.size(); i++) {
             loadFile(container,stageOne[i]);
         }
-    } else if (stage == 2) {
-
-    } else if (stage == 3) {
-        
+    // } else if (stage == 2) {
+    //     container.objects.backgroundColor = stageMetaData[1].backgroundColor;
+    //     container.objects.cameraPosition = stageMetaData[1].camera;
+    //     container.objects.playerHitbox = generateHitbox(stageMetaData[1].camera,50);
+    //     for (int i = 0; i < stageTwo.size(); i++) {
+    //         loadFile(container,stageTwo[i]);
+    //     }
+    // } else if (stage == 3) {
+    //     container.objects.backgroundColor = stageMetaData[2].backgroundColor;
+    //     container.objects.cameraPosition = stageMetaData[2].camera;
+    //     container.objects.playerHitbox = generateHitbox(stageMetaData[2].camera,50);
+    //     for (int i = 0; i < stageThree.size(); i++) {
+    //         loadFile(container,stageThree[i]);
+    //     }
     }
 }

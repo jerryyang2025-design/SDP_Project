@@ -52,9 +52,9 @@ DWORD WINAPI lightingWorker(LPVOID lpParameter) {
     }
     else {
         for (int i = (*task).startObject; i < (*task).endObject; i++) {
-            for (int j = 0; j < (*objects).water.faces.size(); j++) {
-                polygonLightning(*objects, (*objects).water, j, (*objects).lightSource, (*objects).cameraPosition);
-                polygonRefraction((*objects).water, j, (*objects).lightSource, (*objects).cameraPosition);
+            for (int j = 0; j < (*objects).water[i].faces.size(); j++) {
+                polygonLightning(*objects, (*objects).water[i], j, (*objects).lightSource, (*objects).cameraPosition);
+                polygonRefraction((*objects).water[i], j, (*objects).lightSource, (*objects).cameraPosition);
             }
         }
     }
@@ -89,12 +89,14 @@ DWORD WINAPI clipWorker(LPVOID lpParameter) {
     }
 
     if ((*task).mode == 2) {
-        (*obj).water.tempVertices.clear();
-        (*obj).water.tempFaces.clear();
-        (*obj).water.tempFaceColors.clear();
+        for (int i = (*task).startObject; i < (*task).endObject; i++) {
+            (*obj).water[i].tempVertices.clear();
+            (*obj).water[i].tempFaces.clear();
+            (*obj).water[i].tempFaceColors.clear();
 
-        for (int j = 0; j < (*obj).water.faces.size(); j++) {
-            clipPolygon(*obj, (*obj).water, j);
+            for (int j = 0; j < (*obj).water[i].faces.size(); j++) {
+                clipPolygon(*obj, (*obj).water[i], j);
+            }
         }
     }
 
@@ -294,7 +296,7 @@ void handleLighting(struct Objects& objects) {
         threadCount++;
     }
 
-    int waterPolyCount = objects.water.faces.size();
+    int waterPolyCount = objects.water.size();
     perThread = (waterPolyCount + numThreads - 1) / numThreads;
 
     for (int t = 0; t < numThreads; t++) {
@@ -431,12 +433,14 @@ void clipAll(Container& container) {
         container.objects.platforms[i].tempFaces.clear();
         container.objects.platforms[i].tempFaceColors.clear();
     }
+    for (int i = 0; i < container.objects.water.size(); i++) {
+        container.objects.water[i].tempVertices.clear();
+        container.objects.water[i].tempFaces.clear();
+        container.objects.water[i].tempFaceColors.clear();
+    }
     container.objects.end.tempVertices.clear();
     container.objects.end.tempFaces.clear();
     container.objects.end.tempFaceColors.clear();
-    container.objects.water.tempVertices.clear();
-    container.objects.water.tempFaces.clear();
-    container.objects.water.tempFaceColors.clear();
 
     const int numThreads = 16;
 
@@ -479,14 +483,29 @@ void clipAll(Container& container) {
 
     tCount++;
 
-    tasks[tCount].objects = &obj;
-    tasks[tCount].startObject = 0;
-    tasks[tCount].endObject = 1;
-    tasks[tCount].mode = 2;
+    int waterCount = obj.water.size();
+    perThread = (waterCount + numThreads - 1) / numThreads;
 
-    threads[tCount] = CreateThread(NULL, 0, clipWorker, &tasks[tCount], 0, NULL);
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end = (t + 1) * perThread;
 
-    tCount++;
+        if (start >= waterCount) {
+            break;
+        }
+        if (end > waterCount) {
+            end = waterCount;
+        }
+
+        tasks[tCount].objects = &obj;
+        tasks[tCount].startObject = start;
+        tasks[tCount].endObject = end;
+        tasks[tCount].mode = 2;
+
+        threads[tCount] = CreateThread(NULL,0,clipWorker,&tasks[tCount],0,NULL);
+
+        tCount++;
+    }
 
     WaitForMultipleObjects(tCount, threads, TRUE, INFINITE);
 
@@ -579,6 +598,30 @@ void projectAll(Container& container) {
         threadIndex++;
     }
 
+    totalObjects = container.objects.water.size();
+    perThread = (totalObjects + numThreads - 1) / numThreads;
+
+    std::vector<Object> allWater = container.objects.water;
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * perThread;
+        int end = (start + perThread);
+        if (start >= allWater.size()) {
+            break;
+        }
+        if (end > allWater.size()) {
+            end = allWater.size();
+        }
+
+        tasks[threadIndex].objects = &container.objects;
+        tasks[threadIndex].objectList = &allWater;
+        tasks[threadIndex].startIndex = start;
+        tasks[threadIndex].endIndex = end;
+
+        threads[threadIndex] = CreateThread(NULL,0,projectWorker,&tasks[threadIndex],0,NULL);
+        threadIndex++;
+    }
+
     WaitForMultipleObjects(threadIndex, threads, TRUE, INFINITE);
 
     for (int t = 0; t < threadIndex; t++) {
@@ -616,29 +659,6 @@ void projectAll(Container& container) {
         //     }
         //     container.screen.faces.push_back(face);
         //     container.screen.faceColors.push_back(container.objects.end.tempFaceColors[j]);
-        // }
-    }
-
-    int waterBase = container.screen.vertices.size();
-    for (int j = 0; j < container.objects.water.tempVertices.size(); j++) {
-        project(container.objects, container.objects.water.tempVertices, container.screen, j);
-    }
-    for (int j = 0; j < container.objects.water.tempFaces.size(); j++) {
-        if (container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] < 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] < 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] < 0.5) {
-            std::array<int,3> face = container.objects.water.tempFaces[j];
-            for (int k = 0; k < 3; k++) {
-                face[k] += waterBase;
-            }
-            container.screen.faces.push_back(face);
-            container.screen.faceColors.push_back(container.objects.water.tempFaceColors[j]);
-        }
-        // if (!(container.screen.vertices[container.objects.water.tempFaces[j][0] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][1] + waterBase][3] > 0.5 || container.screen.vertices[container.objects.water.tempFaces[j][2] + waterBase][3] > 0.5)) {
-        //     std::array<int,3> face = container.objects.water.tempFaces[j];
-        //     for (int k = 0; k < 3; k++) {
-        //         face[k] += waterBase;
-        //     }
-        //     container.screen.faces.push_back(face);
-        //     container.screen.faceColors.push_back(container.objects.water.tempFaceColors[j]);
         // }
     }
 

@@ -9,13 +9,15 @@
 #define ENVIRONMENT_WIDTH 10000
 
 float waveMovement(std::array<float,3> vertex, long frames) {
-    float wave1 = sin(frames * 0.04 + (vertex[0] - vertex[2]) / 5.0f);
+    float wave1 = sin(frames * 0.04 + (vertex[0] - vertex[2]) / 3.0f);
     return WAVEHEIGHT * wave1 ; // maybe adjust depending on framerate, or change to use time
 }
 
 void handleWaves(Container& container) {
-    for (int i = 0; i < container.objects.water.vertices.size(); i++) {
-        container.objects.water.vertices[i][1] = waveMovement(container.objects.water.vertices[i], container.states.gameStates.frames);
+    for (int i = 0; i < container.objects.water.size(); i++) {
+        for (int j = 0; j < container.objects.water[i].vertices.size(); j++) {
+            container.objects.water[i].vertices[j][1] = waveMovement(container.objects.water[i].vertices[j], container.states.gameStates.frames);
+        }
     }
 }
 
